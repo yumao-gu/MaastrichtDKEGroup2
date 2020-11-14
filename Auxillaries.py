@@ -36,32 +36,35 @@ def gaussian_mixture_model(means, stds, weights, n_samples, dim=1):
 
 def LL(theta, X):
 
-    Score_list  = []
-    Hessian_list = []
-    L = 0
-    for i in range(X.shape[1]):
-        x = X[:,i]
-        #print(x.shape)
+    '''
+    Arguemnts:
+        - theta: a 1x2 matrix. First entry (theta[0,0]) is rho, the second (theta[0,1]) is mu
+        - X: Matrix of observations: a 1xn matrix, where n is the number of samples
 
-        # Likelihood value
-        f_theta = (1-theta[0,0])*norm.pdf(x,0,0.2) +theta[0,0]*norm.pdf(x,theta[0,1],0.2)
-        L += np.log(f_theta)
+    Intermediate results:
+        - g_theta: a 1xn matrix. The i-th entry is the density/likelihood of the fitted model w.r.t. X_i,
+        - Likelihoods: a 1xn matrix this is \hat\L(\rho,\mu | X_i) - the log-likelihood w.r.t. X_i
 
-        # Derivatives first order // Score
-        Score = np.zeros(shape = (theta.shape[1], 1))
+    '''
 
-        d_weight_0 = norm.pdf(x,theta[0, 1], 0.2)-norm.pdf(x, 0, 0.2)
-        Score[0,:] = d_weight_0
 
-        d_weight_1 = theta[0, 0]*norm.pdf(x, theta[0, 1], 0.2)*(x-theta[0, 1])/(0.2**2)
-        Score[1,:] = d_weight_1
 
-        Score_list.append(Score)
+    # Likelihood value
+    g_theta = (1-theta[0,0])*norm.pdf(X,0,0.2) +theta[0,0]*norm.pdf(X,theta[0,1],0.2)
+    Likelihoods = np.log(g_theta)
+    L_value = np.mean(Likelihoods, axis = 1)
 
-        # Hessian
-        # This does not work well yet for multiple datapoints at once
-        Hessian = np.array([[0, norm.pdf(x, theta[0, 1], 0.2).squeeze()*(x.squeeze()-theta[0, 1])/(0.2**2)], [norm.pdf(x, theta[0, 1], 0.2).squeeze()*(x.squeeze()-theta[0, 1])/(0.2**2), norm.pdf(x, theta[0, 1], 0.2).squeeze()*((x.squeeze()-theta[0, 1])**2/(0.2**4)-1/(0.2**2))]])
-        #print(x.shape, theta[0,0].shape,norm.pdf(x, theta[0, 1], 0.2).shape, (norm.pdf(x, theta[0, 1], 0.2)*((x-theta[0, 1])**2/(0.2**4)-1/(0.2**2))).shape)
-        Hessian_list.append(Hessian)
+    # Derivatives first order // Score
+    Score = np.zeros(shape = theta.shape)
 
-    return L, Score_list, Hessian_list
+    Scores_0 = np.exp(-1*Likelihoods)*(norm.pdf(X,theta[0, 1], 0.2)-norm.pdf(X, 0, 0.2))
+    #print(f'Size Scores_0: {Scores_0.shape}')
+    Score[0,0] = np.mean(Scores_0, axis = 1)
+
+    Scores_1 = np.exp(-1*Likelihoods)*(norm.pdf(X,theta[0, 1], 0.2)*(X-theta[0,1])*(theta[0,0]/0.2**2))
+    #print(f'Size Scores_1: {Scores_1.shape}')
+    Score[0,1] = np.mean(Scores_1, axis = 1)
+    
+
+
+    return L_value, Score

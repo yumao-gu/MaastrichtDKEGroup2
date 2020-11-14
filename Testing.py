@@ -23,7 +23,8 @@ print(f'Shape of X:{X.shape}')
 Build Log-Likelihood function in dependence of parameters which are to be determined
 '''
 # initialize
-theta = np.array([[0.4,2.6]]) #to be randomly initialized
+theta = np.array([[0.1,4]]) #to be randomly initialized
+print(f'Shape of theta: {theta.shape}')
 
 # Gradient ascent
 n_iterations = 100000
@@ -31,12 +32,11 @@ lr = 0.05
 now = datetime.datetime.now()
 
 for t in range(n_iterations):
-    L, S, H = LL(theta, X)
-    dW = np.mean(S,axis = 0)
-    theta = theta + lr*dW.T
-
+    L, S = LL(theta, X)
+    theta = theta+lr*S
     if t % 1000 == 0:
-        print(f'Iteration: {t} \t| Log-Likelihood:{L} \t| Time needed: {datetime.datetime.now()-now} | rho {theta[0,0]}, mu{theta[0,1]} ')
+        print(f'S: {S}')
+        print(f'Iteration: {t} \t| Log-Likelihood:{L} \t| Time needed: {datetime.datetime.now()-now} | rho: {theta[0,0]}, mu: {theta[0,1]} ')
         now = datetime.datetime.now()
 
 
