@@ -2,6 +2,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import scipy as sp
+import random
 from scipy.stats import norm,multivariate_normal
 test = True
 
@@ -10,7 +11,7 @@ def gaussian_model(pos = None,
                                             cov = [[2.0, 0.3], [0.3, 0.5]],
                                             test = test):
     '''
-    Create data of a N-dim gaussian model
+    Get z value of a N-dim gaussian model
 
     Arguments:
         - means, cov: should be 1xN and NxN matrix
@@ -36,8 +37,9 @@ def gaussian_mixture_model(pos = None,
                                                                                 [[1.0, 0.8], [0.5, 0.9]]],
                                                                 weights = [0.3,0.7],
                                                                 test = test):
+
     '''
-    Create data of a gaussian mixture model
+    Get z value of a gaussian mixture model
 
     Arguments:
         - pos: the input of sample points
@@ -75,6 +77,51 @@ def gaussian_mixture_model(pos = None,
 
     return value
 
+def gaussian_mixture_model_sample(n_samples = 10000,
+                                                                means = [[0.9, -0.8],[-0.7, 0.9]],
+                                                                covs = [[[2.0, 0.3], [0.3, 0.5]],
+                                                                                [[0.3, 0.5], [0.3, 2.0]]],
+                                                                weights = [0.3,0.7],
+                                                                test = test):
+    '''
+    Sample from a gaussian mixture model
+
+    Arguments:
+        - n_samples: the num of sample points
+        - means, covs: lists containing means and standard deviations of \
+                                        the single gaussian that are mixed. Note, the cov\
+                                        matrix must be semidefine
+        - weights: weight of each used gaussian when combining
+        - test: test flag, only test dim = 2
+
+    Outputs:
+        - samples: Data matrix containing the samples from the gaussian mixture model
+    '''
+    # make sure all lists are o same length and weights are well defined
+    assert len(means) == len(covs)
+    assert len(means) == len(weights)
+    assert sum(weights) == 1
+
+    dim = len(means[0])
+    samples = np.zeros((dim,n_samples))
+
+    # sample from each gaussian and add up to obtain mixture model
+    for i in range(n_samples):
+        r = random.random()
+        for j in range(len(weights)):
+            if sum(weights[:j+1]) > r:
+                samples[:,i] = multivariate_normal.rvs(mean = means[j], cov = covs[j])
+                break
+
+    if test:
+        assert dim == 2
+        fig = plt.figure()
+        ax = fig.add_subplot(111)
+        ax.scatter(samples[0,:],samples[1,:])
+        plt.show()
+
+    return samples
+
 def LL(theta, X):
 
     '''
@@ -87,8 +134,6 @@ def LL(theta, X):
         - Likelihoods: a 1xn matrix this is \hat\L(\rho,\mu | X_i) - the log-likelihood w.r.t. X_i
 
     '''
-
-
 
     # Likelihood value
     g_theta = (1-theta[0,0])*norm.pdf(X,0,0.2) +theta[0,0]*norm.pdf(X,theta[0,1],0.2)
@@ -112,4 +157,5 @@ def LL(theta, X):
 
 if __name__ == "__main__":
     # gaussian_model(test = test)
-    gaussian_mixture_model(test = test)
+    # gaussian_mixture_model(test = test)
+    gaussian_mixture_model_sample(test = test)
