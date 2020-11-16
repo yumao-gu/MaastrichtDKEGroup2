@@ -1,7 +1,6 @@
 import numpy as np # https://numpy.org/doc/
 #import statistics as stat # https://docs.python.org/3/library/statistics.html
 import scipy as sp
-import sympy as sym
 from sklearn.utils import resample
 
 
@@ -62,7 +61,7 @@ def normal_CI(alpha, Scores, Hessians, theta_n_M):
 
 
 
-def boostrap_CI(X, alpha, theta_hat, num_bootstraps = 100000, lr, n_iterations = 100 ):
+def boostrap_CI(X, alpha, theta_hat, num_bootstraps, lr, n_iterations = 100 ):
 
     '''
     Function to create CI via bootstrap method
@@ -97,7 +96,7 @@ def boostrap_CI(X, alpha, theta_hat, num_bootstraps = 100000, lr, n_iterations =
     for j in range(num_bootstraps):
 
         #Creating bootrap sample from original data
-        X_bootstrap = resample(X, replace=True, n_samples= n))
+        X_bootstrap = resample(X, replace=True, n_samples= n)
 
         # perform GA on new likelihhod function
         theta = theta_hat # initialize theta as theta_hat
