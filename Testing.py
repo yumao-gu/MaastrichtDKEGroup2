@@ -5,6 +5,7 @@ import torch
 import scipy as sp
 from scipy.stats import norm
 from Auxillaries import *
+from ConfidenceIntervals import *
 import datetime
 
 '''
@@ -96,6 +97,11 @@ ax.set_xlabel('mu')
 ax.set_ylabel('10*rho')
 plt.title('Contourplot of Log-Likelihood function with gradient ascent trajectories')
 plt.show()
+
+print()
+print(f'Dim of theta:{theta_hat.shape}')
+print(f'Dim of Scores:{Scores.shape}')
+print(f'Dim of Hessian:{Hessians.shape}')
 
 
 
