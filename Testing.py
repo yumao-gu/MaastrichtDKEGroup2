@@ -14,7 +14,7 @@ Create data of a gaussian mixture model
 weights = [.5, .45, .05]
 means = [[0.], [.75],[ 3.]]
 covs = [[.2**2], [.2**2], [.2**2]]
-n = 100
+n = 10000
 
 # Create sampels of given model
 X = gaussian_mixture_model_sample(n, means, covs, weights, test=False)
@@ -52,15 +52,12 @@ else:
 Gradient Ascent
 '''
 n_iterations = 2000
-lr = 0.01
+lr = 0.005
 now = datetime.datetime.now()
-n_runs = 20
+n_runs = 10
 
 # Initializing Loss as minusinifinty to make sure first run achieves higher likelihood
 max_likelihood = -1*np.inf
-# Initializing caches
-Scores_list = []
-#Hessians =
 
 # Starting Plot
 fig, ax = plt.subplots(1,1, figsize = (7,7))
@@ -68,12 +65,12 @@ fig, ax = plt.subplots(1,1, figsize = (7,7))
 
 for run in range(n_runs):
 
-    theta = np.array([[np.random.uniform(0,1), np.random.uniform(0,5)]])  # to be randomly initialized
+    theta = np.array([[np.random.uniform(0,.6), np.random.uniform(0,5)]])  # to be randomly initialized
     trajectory = [theta]
 
     for t in range(n_iterations):
 
-        L, S = LL(theta, X)
+        L, S, _ = LL(theta, X, calc_Hessian = False)
         theta = theta+lr*S
         trajectory.append(theta)
 
@@ -85,15 +82,22 @@ for run in range(n_runs):
 
     # Updating Quantities if new max is found
     if L > max_likelihood:
+        # Call LL again to obtian Hessian, too
+        L, S, H = LL(theta, X, calc_Hessian = True)
         print('New Maximum found')
+        # Update parameter, Scores and Hessian of currently best estimate
+        theta_hat = theta
         max_likelihood = L
-        Scores_list.append(S)
-        #Hessians =
+        Scores = S
+        Hessians = H
 
 ax.imshow(Colourplot, cmap='Reds', extent = [0,5,0,.6], aspect='auto') #extent = [0,5,0,6]
 ax.set_xlabel('mu')
 ax.set_ylabel('10*rho')
 plt.title('Contourplot of Log-Likelihood function with gradient ascent trajectories')
 plt.show()
+
+
+
 
 

@@ -122,7 +122,7 @@ def gaussian_mixture_model_sample(n_samples = 10000,
 
     return samples
 
-def LL(theta, X):
+def LL(theta, X, calc_Hessian = False):
 
     '''
     Arguemnts:
@@ -140,20 +140,43 @@ def LL(theta, X):
     Likelihoods = np.log(g_theta)
     L_value = np.mean(Likelihoods, axis = 1)
 
+    # Simplifications
+    E = np.exp(-1*Likelihoods)
+    phi1 = norm.pdf(X,theta[0, 1], 0.2)
+    phi2 = norm.pdf(X,0, 0.2)
     # Derivatives first order // Score
     Score = np.zeros(shape = theta.shape)
 
-    Scores_0 = np.exp(-1*Likelihoods)*(norm.pdf(X,theta[0, 1], 0.2)-norm.pdf(X, 0, 0.2))
+    Scores_0 = E*(phi1-phi2)
     #print(f'Size Scores_0: {Scores_0.shape}')
     Score[0,0] = np.mean(Scores_0, axis = 1)
 
-    Scores_1 = np.exp(-1*Likelihoods)*(norm.pdf(X,theta[0, 1], 0.2)*(X-theta[0,1])*(theta[0,0]/0.2**2))
+    Scores_1 = E*(phi1*(X-theta[0,1])*(theta[0,0]/0.2**2))
     #print(f'Size Scores_1: {Scores_1.shape}')
     Score[0,1] = np.mean(Scores_1, axis = 1)
 
+    # Hessian
+    H = np.zeros((theta.shape[1], theta.shape[1]))
+
+    if calc_Hessian:
+        # Deriavtive twice w.r.t rho
+        d2_rho_summands = (phi1-phi2)**2 * E**2
+        d2_rho = -np.mean(d2_rho_summands, axis = 1)
+        H[0,0] = d2_rho
+
+        # Deriavtive twice w.r.t mu
+        d2_mu_summands = E*phi1*(((X-theta[0,1])/(0.2))**2-1) -theta[0,0]*E**2*phi1**2 * (X-theta[0,1])
+        d2_mu = theta[0,0]/0.2**2 * np.mean(d2_mu_summands , axis = 1)
+        H[1,1] = d2_mu
+
+        # Deriavtive wrt mu and rho
+        d_mu_d_rho_summands = (X-theta[0,1])/0.2**2 * (E-theta[0,0]*E**2*(phi1-phi2))
+        d_mu_d_rho = np.mean(d_mu_d_rho_summands, axis = 1)
+        H[0,1]=H[1,0] = d_mu_d_rho
 
 
-    return L_value, Score
+
+    return L_value, Score, H
 
 if __name__ == "__main__":
     # gaussian_model(test = test)
