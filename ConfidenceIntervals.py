@@ -91,7 +91,7 @@ def boostrap_CI(X, alpha, theta_hat, num_bootstraps = 100000, lr, n_iterations =
     n = X.shape[1]
 
     #Cache for saving Boostrap samples
-    Bootstrap_thetas = mp.zeros((num_bootstraps, theta_hat.shape[1])
+    Bootstrap_thetas = mp.zeros((num_bootstraps, theta_hat.shape[1]))
 
     # Looping over amount of repitions of method
     for j in range(num_bootstraps):
