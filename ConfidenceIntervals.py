@@ -32,7 +32,6 @@ def normal_CI(alpha, Score, Hessian, theta_n_M):
     TODO: Function testing: in particular dimensions
     '''
 
-    assert len(Scores) == len(Hessians)
     assert 0 <= alpha and alpha <=1
     # assert dimensions of theta_n_M, Scores, Hessians
 
