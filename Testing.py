@@ -15,7 +15,7 @@ Create data of a gaussian mixture model
 weights = [.5, .45, .05]
 means = [[0.], [.75],[ 3.]]
 covs = [[.2**2], [.2**2], [.2**2]]
-n = 100000
+n = 1000
 
 # Create sampels of given model
 X = gaussian_mixture_model_sample(n, means, covs, weights, test=False)
@@ -53,9 +53,9 @@ else:
 Gradient Ascent
 '''
 n_iterations = 2000
-lr = 0.005
+lr = 0.001
 now = datetime.datetime.now()
-n_runs = 10
+n_runs = 3
 
 # Initializing Loss as minusinifinty to make sure first run achieves higher likelihood
 max_likelihood = -1*np.inf
@@ -72,7 +72,8 @@ for run in range(n_runs):
     for t in range(n_iterations):
 
         L, S, _ = LL(theta, X, calc_Hessian = False)
-        theta = theta+lr*S
+        d_theta = np.mean(S, axis = 0, keepdims = True)
+        theta = theta+lr*d_theta
         trajectory.append(theta)
 
         if t % 100 == 0:
@@ -90,7 +91,7 @@ for run in range(n_runs):
         theta_hat = theta
         max_likelihood = L
         Scores = S
-        Hessians = H
+        Hessian = H
 
 ax.imshow(Colourplot, cmap='Reds', extent = [0,5,0,.6], aspect='auto') #extent = [0,5,0,6]
 ax.set_xlabel('mu')
@@ -101,9 +102,12 @@ plt.show()
 print()
 print(f'Dim of theta:{theta_hat.shape}')
 print(f'Dim of Scores:{Scores.shape}')
-print(f'Dim of Hessian:{Hessians.shape}')
+print(f'Dim of Hessian:{Hessian.shape}')
 
 
+CI = normal_CI(0.05, Scores, Hessian, theta_hat)
 
+print(f'theta:{theta_hat}')
+print(f'normal CI borders: {CI}')
 
 

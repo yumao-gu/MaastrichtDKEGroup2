@@ -132,28 +132,31 @@ def LL(theta, X, calc_Hessian = False):
     Intermediate results:
         - g_theta: a 1xn matrix. The i-th entry is the density/likelihood of the fitted model w.r.t. X_i,
         - Likelihoods: a 1xn matrix this is \hat\L(\rho,\mu | X_i) - the log-likelihood w.r.t. X_i
+        - L_value: scalar; Actual likelihood value
+        - E: a 1xn matrix; this gives 1/g_theta
+        - phi1: a 1xn matrix; density values of one (mean mu) gaussian
+        - phi2: a 1xn matrix; density values of second (mean zero) gaussian
+        - Score: a nx2 matrix; Each row is one S(theta|X_i)
 
     '''
 
+    n = X.shape[1]
+
     # Likelihood value
-    g_theta = (1-theta[0,0])*norm.pdf(X,0,0.2) +theta[0,0]*norm.pdf(X,theta[0,1],0.2)
-    Likelihoods = np.log(g_theta)
-    L_value = np.mean(Likelihoods, axis = 1)
+    g_theta = (1-theta[0,0])*norm.pdf(X,0,0.2) +theta[0,0]*norm.pdf(X,theta[0,1],0.2) # dim 1xn
+    Likelihoods = np.log(g_theta) # dim 1xn
+    L_value = np.mean(Likelihoods, axis = 1) # dim 1xn
 
     # Simplifications
-    E = np.exp(-1*Likelihoods)
-    phi1 = norm.pdf(X,theta[0, 1], 0.2)
-    phi2 = norm.pdf(X,0, 0.2)
+    E = np.exp(-1*Likelihoods)      # dim 1xn
+    phi1 = norm.pdf(X,theta[0, 1], 0.2)  # dim 1xn
+    phi2 = norm.pdf(X,0, 0.2)  # dim 1xn
+
     # Derivatives first order // Score
-    Score = np.zeros(shape = theta.shape)
+    Score = np.zeros((n, theta.shape[1])) # dim 2xn
 
-    Scores_0 = E*(phi1-phi2)
-    #print(f'Size Scores_0: {Scores_0.shape}')
-    Score[0,0] = np.mean(Scores_0, axis = 1)
-
-    Scores_1 = E*(phi1*(X-theta[0,1])*(theta[0,0]/0.2**2))
-    #print(f'Size Scores_1: {Scores_1.shape}')
-    Score[0,1] = np.mean(Scores_1, axis = 1)
+    Score[:,0] = E*(phi1-phi2)   #dim 1xn
+    Score[:,1] = E*(phi1*(X-theta[0,1])*(theta[0,0]/0.2**2)) #dim 1xn
 
     # Hessian
     H = np.zeros((theta.shape[1], theta.shape[1]))
