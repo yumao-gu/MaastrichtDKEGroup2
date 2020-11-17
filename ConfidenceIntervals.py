@@ -10,8 +10,8 @@ def normal_CI(alpha, Scores, Hessian, theta_n_M):
 
     Arguments:
         - alpha: confidence parameter
-        - Scores: list of length n : Scores at maximum estimate w.r.t. single Observations X_i | S(estimate|X_i)
-                    - Every entry should be of the form: 1x dim(theta_n_M)
+        - Scores: matrix dim n x dim(theta) : Each rows is one S(theta|X_i)
+
 
         - Hessians: list of length n : Hessians at maximum estimate w.r.t. single Observations X_i | H(estimate|X_i)
                     - Every entry should be of the form: dim(theta_n_M) x dim(theta_n_M)
@@ -35,6 +35,7 @@ def normal_CI(alpha, Scores, Hessian, theta_n_M):
     assert 0 <= alpha and alpha <=1
     # assert dimensions of theta_n_M, Scores, Hessians
 
+    n = Scores.shape[0]
     # Calculate quantile
     z = sp.stats.norm.ppf(1-alpha/2)
 
@@ -43,8 +44,8 @@ def normal_CI(alpha, Scores, Hessian, theta_n_M):
     H_n_inv = np.linalg.inv(Hessian)
 
     # Operations on Scores
-    S_rank_one_matrices = [np.dot(S.T,S) for S in Scores]
-    S_n = np.mean(S_rank_one_matrices, axis=0)
+
+    S_n = 1/n * np.dot(Scores.T, Scores) # 1/n sum S(theta|X_i) * S(theta|X_i)^T // is a dim(theta) by dim(theta) matrix
 
     # Cov
     Cov = np.dot(H_n_inv, np.dot(S_n, H_n_inv))
@@ -57,7 +58,7 @@ def normal_CI(alpha, Scores, Hessian, theta_n_M):
     CI_borders[0, :] = theta_n_M - z * Cov_diag
     CI_borders[1, :] = theta_n_M + z * Cov_diag
 
-    print(f'Cov_diag: {Cov_diag}')
+    print(f'Cov: {Cov}')
     print(f'z:{z}')
 
     return CI_borders
