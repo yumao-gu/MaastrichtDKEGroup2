@@ -6,22 +6,21 @@ from sklearn.utils import resample
 
 def normal_CI(alpha, Scores, Hessian, theta_n_M):
     '''
-    borders of a normal CI
+    This function calculates the borders of a normal CI
 
     Arguments:
         - alpha: confidence parameter
-        - Scores: matrix dim n x dim(theta) : Each rows is one S(theta|X_i)
+        - Scores: matrix dim n x dim(theta) : Each rows is one S(theta|X_i) (transposed)
 
+        - Hessian:  dim(theta_n_M) x dim(theta_n_M) = 1/n sum H(theta | X_i)
 
-        - Hessians: list of length n : Hessians at maximum estimate w.r.t. single Observations X_i | H(estimate|X_i)
-                    - Every entry should be of the form: dim(theta_n_M) x dim(theta_n_M)
 
         - theta_n_M: The parameter estimate derived by multiple gradient ascent and comparison of likelihood values
-                    - Should be of the form: 1x dim(theta_n_M)
+                    - Should be of the form: 1x dim(theta)
 
     Outputs:
-        - CI_borders: First row: Lower bound of CI // 1 x dim(theta_n_M)-vector
-                      Second row:  Upper bound of CI // 1 x dim(theta_n_M)-vector
+        - CI_borders: First row: Lower bounds of CI // 1 x dim(theta_n_M)-vector
+                      Second row:  Upper bounds of CI // 1 x dim(theta_n_M)-vector
 
     Further Information:
         - I expect the function tau to map the parameter vector to a single parameter,
@@ -36,6 +35,7 @@ def normal_CI(alpha, Scores, Hessian, theta_n_M):
     # assert dimensions of theta_n_M, Scores, Hessians
 
     n = Scores.shape[0]
+
     # Calculate quantile
     z = sp.stats.norm.ppf(1-alpha/2)
 
@@ -44,7 +44,6 @@ def normal_CI(alpha, Scores, Hessian, theta_n_M):
     H_n_inv = np.linalg.inv(Hessian)
 
     # Operations on Scores
-
     S_n = 1/n * np.dot(Scores.T, Scores) # 1/n sum S(theta|X_i) * S(theta|X_i)^T // is a dim(theta) by dim(theta) matrix
 
     # Cov
@@ -55,7 +54,7 @@ def normal_CI(alpha, Scores, Hessian, theta_n_M):
 
     CI_borders = np.zeros((2, theta_n_M.shape[1]))
 
-    CI_borders[0, :] = theta_n_M - z * Cov_diag
+    CI_borders[0, :] = theta_n_M - z * Cov_diag ## CI_borders[0, i] = theta_n_M[i] - z*Cov_ii
     CI_borders[1, :] = theta_n_M + z * Cov_diag
 
     print(f'Cov: {Cov}')

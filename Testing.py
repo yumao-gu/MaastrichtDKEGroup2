@@ -15,7 +15,7 @@ Create data of a gaussian mixture model
 weights = [.5, .45, .05]
 means = [[0.], [.75],[ 3.]]
 covs = [[.2**2], [.2**2], [.2**2]]
-n = 1000
+n = 100000
 
 # Create sampels of given model
 X = gaussian_mixture_model_sample(n, means, covs, weights, test=False)
@@ -53,7 +53,7 @@ else:
 Gradient Ascent
 '''
 n_iterations = 2000
-lr = 0.001
+lr = 0.005
 now = datetime.datetime.now()
 n_runs = 3
 
@@ -103,6 +103,8 @@ print()
 print(f'Dim of theta:{theta_hat.shape}')
 print(f'Dim of Scores:{Scores.shape}')
 print(f'Dim of Hessian:{Hessian.shape}')
+print(f'Hessian:{Hessian}')
+
 
 
 CI = normal_CI(0.05, Scores, Hessian, theta_hat)

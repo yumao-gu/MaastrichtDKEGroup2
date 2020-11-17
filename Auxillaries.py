@@ -168,7 +168,7 @@ def LL(theta, X, calc_Hessian = False):
         H[0,0] = d2_rho
 
         # Deriavtive twice w.r.t mu
-        d2_mu_summands = E*phi1*(((X-theta[0,1])/(0.2))**2-1) -theta[0,0]*E**2*phi1**2 * (X-theta[0,1])
+        d2_mu_summands = E*phi1*(((X-theta[0,1])/(0.2))**2-1) -theta[0,0]*E**2*phi1**2 * ((X-theta[0,1])/(0.2))**2
         d2_mu = theta[0,0]/0.2**2 * np.mean(d2_mu_summands , axis = 1)
         H[1,1] = d2_mu
 
