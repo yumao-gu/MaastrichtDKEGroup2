@@ -20,8 +20,8 @@ def normal_CI(alpha, Scores, Hessians, theta_n_M):
                     - Should be of the form: 1x dim(theta_n_M)
 
     Outputs:
-        - lower: Lower bound of CI // 1 x dim(theta_n_M)-vector
-        - upper: Upper bound of CI // 1 x dim(theta_n_M)-vector
+        - CI_borders: First row: Lower bound of CI // 1 x dim(theta_n_M)-vector
+                      Second row:  Upper bound of CI // 1 x dim(theta_n_M)-vector
 
     Further Information:
         - I expect the function tau to map the parameter vector to a single parameter,
@@ -53,10 +53,13 @@ def normal_CI(alpha, Scores, Hessians, theta_n_M):
     Cov_diag = np.diag(Cov).reshape(1,-1)
 
     # Calculating bounds
-    lower = theta_n_M - z * Cov_diag
-    upper = theta_n_M + z * Cov_diag
 
-    return lower, upper
+    CI_borders = np.zeros((2, theta_hat.shape[1]))
+
+    CI_borders[0, :] = theta_n_M - z * Cov_diag
+    CI_borders[1, :] = theta_n_M + z * Cov_diag
+
+    return CI_borders
 
 
 

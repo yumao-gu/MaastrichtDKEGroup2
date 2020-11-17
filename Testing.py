@@ -15,7 +15,7 @@ Create data of a gaussian mixture model
 weights = [.5, .45, .05]
 means = [[0.], [.75],[ 3.]]
 covs = [[.2**2], [.2**2], [.2**2]]
-n = 10000
+n = 100000
 
 # Create sampels of given model
 X = gaussian_mixture_model_sample(n, means, covs, weights, test=False)
