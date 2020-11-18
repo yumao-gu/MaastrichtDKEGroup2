@@ -80,10 +80,10 @@ else:
 '''
 Gradient Ascent
 '''
-n_iterations = 3000
-lr = 0.005
+n_iterations = 2500
+lr = 0.001
 now = datetime.datetime.now()
-n_runs = 4
+n_runs = 10
 
 # Initializing Loss as minusinifinty to make sure first run achieves higher likelihood
 max_likelihood = -1*np.inf
@@ -101,7 +101,7 @@ for run in range(n_runs):
     theta.requires_grad= True # to be randomly initialized
 
     with torch.no_grad():
-        trajectory = [theta.data.numpy()]
+        trajectory = [theta.clone().data.numpy()]
 
     for t in range(n_iterations):
 
@@ -114,7 +114,7 @@ for run in range(n_runs):
             theta.add_(lr * theta.grad)
             theta.grad.zero_()
             # Keeping track
-            trajectory.append(theta.data.numpy())
+            trajectory.append(theta.clone().data.numpy())
 
 
 
@@ -139,14 +139,15 @@ for run in range(n_runs):
         #Hessian = H
 
 # Starting Plot
-#fig, ax = plt.subplots(1,1, figsize = (7,7))
+fig, ax = plt.subplots(1,1, figsize = (7,7))
 for run in range(n_runs):
     trajectory = trajectory_dict[run]
-    plt.plot([a[0,1] for a in trajectory], [a[0,0] for a in trajectory], color = 'black')
-#ax.imshow(Colourplot, cmap='Reds', extent = [0,5,0,.6], aspect='auto') #extent = [0,5,0,6]
-#ax.set_xlabel('mu')
-#ax.set_ylabel('rho')
-#plt.title('Contourplot of Log-Likelihood function with gradient ascent trajectories')
+    m = len(trajectory_dict[run])
+    ax.plot([trajectory[i][0,1] for i in range(m)], [trajectory[i][0,0] for i in range(m)], label = f'run: {run}')
+ax.imshow(Colourplot, cmap='Reds', extent = [0,5,0,.6], aspect='auto') #extent = [0,5,0,6]
+ax.set_xlabel('mu')
+ax.set_ylabel('rho')
+plt.title('Contourplot of Log-Likelihood function with gradient ascent trajectories')
 plt.show()
 
 
