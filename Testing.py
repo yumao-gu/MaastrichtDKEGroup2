@@ -53,7 +53,7 @@ else:
 Gradient Ascent
 '''
 n_iterations = 2000
-lr = 0.005
+lr = 0.01
 now = datetime.datetime.now()
 n_runs = 3
 
@@ -74,6 +74,7 @@ for run in range(n_runs):
         L, S, _ = LL(theta, X, calc_Hessian = False)
         d_theta = np.mean(S, axis = 0, keepdims = True)
         theta = theta+lr*d_theta
+        print(theta.shape, theta.dtype)
         trajectory.append(theta)
 
         if t % 100 == 0:
@@ -111,5 +112,6 @@ CI = normal_CI(0.05, Scores, Hessian, theta_hat)
 
 print(f'theta:{theta_hat}')
 print(f'normal CI borders: {CI}')
+
 
 

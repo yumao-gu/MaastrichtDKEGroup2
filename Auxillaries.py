@@ -181,6 +181,9 @@ def LL(theta, X, calc_Hessian = False):
 
     return L_value, Score, H
 
+
+
+
 if __name__ == "__main__":
     # gaussian_model(test = test)
     # gaussian_mixture_model(test = test)
