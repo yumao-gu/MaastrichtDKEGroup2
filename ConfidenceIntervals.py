@@ -57,8 +57,7 @@ def normal_CI(alpha, Scores, Hessian, theta_n_M):
     CI_borders[0, :] = theta_n_M - z * Cov_diag ## CI_borders[0, i] = theta_n_M[i] - z*Cov_ii
     CI_borders[1, :] = theta_n_M + z * Cov_diag
 
-    print(f'Cov: {Cov}')
-    print(f'z:{z}')
+    print(f'Covariance matrix:\n {Cov}')
 
     return CI_borders
 
