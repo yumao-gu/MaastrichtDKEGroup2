@@ -3,6 +3,7 @@ from Auxillaries import *
 import math
 from hessian import hessian
 import datetime
+from ConfidenceIntervals import *
 
 
 def phi_torch(x,mu,sigma):
@@ -53,6 +54,7 @@ print(f'Shape of X:{X.shape}')
 Creating Contourlpot of likelihood function in dependence of parameters 
 '''
 make_Contourplot = False
+make_plots = False
 ticks = 1000
 
 if make_Contourplot:
@@ -81,9 +83,9 @@ else:
 Gradient Ascent
 '''
 n_iterations = 2500
-lr = 0.001
+lr = 0.005
 now = datetime.datetime.now()
-n_runs = 10
+n_runs = 2
 
 # Initializing Loss as minusinifinty to make sure first run achieves higher likelihood
 max_likelihood = -1*np.inf
@@ -126,28 +128,44 @@ for run in range(n_runs):
 
     trajectory_dict.update({run : trajectory})
     # Updating Quantities if new max is found
+
     if L > max_likelihood:
-        # Call LL again to obtian Hessian, too
-        #loglikelihoods = LogLikelihood(theta, X)
-        #L
-        #L.backward()
         print('New Maximum found')
-        # Update parameter, Scores and Hessian of currently best estimate
-        #theta_hat = theta
+        # Nex max theta_n_M candidate
         max_likelihood = L
-        #Scores = S
-        #Hessian = H
+
+        # Getting all scores w.r.t. the single X_i
+        Scores = torch.autograd.functional.jacobian(LogLikelihood, (theta, X))[0].squeeze().numpy()
+        # sanity check
+        print(f'Scores: {Scores}')
+        print(f'Actual Gradient: {np.mean(Scores, axis = 0)} (~ 0)')
+
+        # hessian needs a scalar function
+        LogLikelihood_forHessian = lambda param : torch.mean(LogLikelihood(param, X))
+        Hessian = torch.autograd.functional.hessian(LogLikelihood_forHessian, theta).squeeze().numpy()
+
+        print(f'Hessian {Hessian}')
+        print(f'Hessian shape {Hessian.shape}')
+
+        # finally save new largest maximum
+        theta_hat = theta.clone().data.numpy()
+
 
 # Starting Plot
-fig, ax = plt.subplots(1,1, figsize = (7,7))
-for run in range(n_runs):
-    trajectory = trajectory_dict[run]
-    m = len(trajectory_dict[run])
-    ax.plot([trajectory[i][0,1] for i in range(m)], [trajectory[i][0,0] for i in range(m)], label = f'run: {run}')
-ax.imshow(Colourplot, cmap='Reds', extent = [0,5,0,.6], aspect='auto') #extent = [0,5,0,6]
-ax.set_xlabel('mu')
-ax.set_ylabel('rho')
-plt.title('Contourplot of Log-Likelihood function with gradient ascent trajectories')
-plt.show()
+if make_plots:
+    fig, ax = plt.subplots(1,1, figsize = (7,7))
+    for run in range(n_runs):
+        trajectory = trajectory_dict[run]
+        m = len(trajectory_dict[run])
+        ax.plot([trajectory[i][0,1] for i in range(m)], [trajectory[i][0,0] for i in range(m)], label = f'run: {run}')
+    ax.imshow(Colourplot, cmap='Reds', extent = [0,5,0,.6], aspect='auto') #extent = [0,5,0,6]
+    ax.set_xlabel('mu')
+    ax.set_ylabel('rho')
+    plt.title('Contourplot of Log-Likelihood function with gradient ascent trajectories')
+    plt.show()
 
 
+CI = normal_CI(0.05, Scores, Hessian, theta_hat)
+
+print(f'theta:{theta_hat}')
+print(f'normal CI borders: {CI}')
