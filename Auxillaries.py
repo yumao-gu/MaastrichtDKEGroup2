@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import scipy as sp
 import random
-import torch
+# import torch
 import datetime
 from scipy.stats import norm,multivariate_normal
 test = True
