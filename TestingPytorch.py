@@ -83,7 +83,7 @@ Gradient Ascent
 # Set parameters here
 n_iterations = 2500 #max number of iterations # TODO: alternatively/ additionally a error-based threshold?
 lr = 0.005 # learning rate / stepsize
-n_runs = 10
+n_runs = 4
 
 # Initializing Loss as minus infinity to make sure first run achieves higher likelihood
 max_likelihood = -1*np.inf
@@ -102,7 +102,8 @@ for run in range(n_runs):
                                            data=X,
                                            max_iterations=n_iterations,
                                            learningrate=lr,
-                                           run_id=run)
+                                           run_id=run,
+                                           print_info=True)
 
     # Save optimization trajectory
     trajectory_dict.update({run : trajectory})
@@ -112,7 +113,7 @@ for run in range(n_runs):
     if L > max_likelihood:
         # This takes forever if n is large. As it is torch implementation I don't see a way to get this faster
         print(f'New Maximum found! old:{max_likelihood} -> new:{L}')
-        
+
         # Update highest likelihood and theta estimate
         max_likelihood = L
         theta_hat = theta.clone().data.numpy()
@@ -128,6 +129,12 @@ CI = normal_CI(0.05, Scores, Hessian, theta_hat)
 
 print(f'theta:\n {theta_hat}')
 print(f'normal CI borders:\n {CI}')
+
+
+CI = boostrap_CI_torch(data=X, alpha=0.05, theta_hat=theta_hat, num_bootstraps=10, func=LogLikelihood, lr=0.001,n_iterations = 200, print_ga_info=True)
+
+print(f'theta:\n {theta_hat}')
+print(f'Bootstrap CI borders:\n {CI}')
 
 # Starting Plot
 if make_plots:

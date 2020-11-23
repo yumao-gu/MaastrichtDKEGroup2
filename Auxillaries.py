@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import scipy as sp
 import random
-# import torch
+import torch
 import datetime
 from scipy.stats import norm,multivariate_normal
 test = True
@@ -210,7 +210,7 @@ def phi_torch(x,mu,sigma):
 
     return prob
 
-def gradient_ascent_torch(func, param , data, max_iterations, learningrate, run_id):
+def gradient_ascent_torch(func, param , data, max_iterations, learningrate, run_id = 0,  print_info = False):
 
     '''
     This functions performs gradient ascent on the function func, which is governed by the arguments param.
@@ -256,10 +256,11 @@ def gradient_ascent_torch(func, param , data, max_iterations, learningrate, run_
             optim_trajectory.append(param.clone().data.numpy())
 
         # Keeping informed of progress during optimization
-        if t % 100 == 0:
-            # TODO make more flexible for any ind of parameter length
-            print(f'Run: {run_id+1}\t| Iteration: {t} \t| Log-Likelihood:{loglikelihood_value} \t|  rho: {param[0,0]}, mu: {param[0,1]}  |  Time needed: {datetime.datetime.now()-now}  ')
-            now = datetime.datetime.now()
+        if print_info:
+            if t % 100 == 0:
+                # TODO make more flexible for any ind of parameter length
+                print(f'Run: {run_id+1}\t| Iteration: {t} \t| Log-Likelihood:{loglikelihood_value} \t|  rho: {param[0,0]}, mu: {param[0,1]}  |  Time needed: {datetime.datetime.now()-now}  ')
+                now = datetime.datetime.now()
 
     # after all iterations are done return parameters, value of log-likelihood function at that maximum, trajectory
     return param, loglikelihood_value, optim_trajectory

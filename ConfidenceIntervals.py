@@ -2,6 +2,7 @@ import numpy as np # https://numpy.org/doc/
 #import statistics as stat # https://docs.python.org/3/library/statistics.html
 import scipy as sp
 from sklearn.utils import resample
+from Auxillaries import *
 
 
 def normal_CI(alpha, Scores, Hessian, theta_n_M):
@@ -57,7 +58,7 @@ def normal_CI(alpha, Scores, Hessian, theta_n_M):
     CI_borders[0, :] = theta_n_M - z * Cov_diag ## CI_borders[0, i] = theta_n_M[i] - z*Cov_ii
     CI_borders[1, :] = theta_n_M + z * Cov_diag
 
-    print(f'Covariance matrix:\n {Cov}')
+    #print(f'Covariance matrix:\n {Cov}')
 
     return CI_borders
 
@@ -112,6 +113,67 @@ def boostrap_CI(X, alpha, theta_hat, num_bootstraps, lr, n_iterations = 100 ):
 
         # Saving sample of theta
         Bootstrap_thetas[j,:] = theta
+
+    # Cache for borders of CIs first row lower bound, second row upper bound, each column corresponds to one entry of the parameter vector
+    CI_borders = np.zeros((2,theta_hat.shape[1]))
+
+    CI_borders[0,:] = np.quantile(Bootstrap_thetas, alpha/2, axis = 0)
+    CI_borders[1,:] = np.quantile(Bootstrap_thetas, 1-alpha/2, axis = 0)
+
+    return CI_borders
+
+
+def boostrap_CI_torch(data, alpha, theta_hat, num_bootstraps, func, lr, n_iterations = 200, print_ga_info = False ):
+
+    '''
+    Function to create CI via bootstrap method
+
+    Arguments:
+        - X: original dataset
+        - alpha: confidence parameter
+        - theta_hat: Estimate derived by the normal M-times run gradient ascent
+        - num_bootstraps: number of bootstrap samples to be created
+        - lr: learning rate used in gradient ascent
+        - n_iterations: number of steps used in gradient ascent
+
+    Intermediates:
+        - n: size of provided dataset
+        - Bootstrap_thetas: Cache to store the new, to be calculated, estimates of theta, dim: num_bootstraps x dim theta
+        - X_bootstrap: Bootstrap sample of X, size n
+        - CI_borders: lower and upper bounds of CI of each theta_i : dim 2x dim theta
+
+    Further Information:
+        - I expect the function tau to map the parameter vector to a single parameter,
+          thus we create a CI for every entry of the parameter vector.
+
+    '''
+
+    # number of data points
+    n = data.shape[1]
+
+    #Cache for saving Boostrap samples
+    Bootstrap_thetas = np.zeros((num_bootstraps, theta_hat.shape[1]))
+
+    # Looping over amount of repitions of method
+    for j in range(num_bootstraps):
+
+        #Creating bootrap sample from original data
+        X_bootstrap = resample(data, replace=True, n_samples= n)
+
+        # perform GA on new likelihhod function
+        theta = torch.tensor(theta_hat, requires_grad = True) # initialize theta as theta_hat
+
+        theta, _, _ = gradient_ascent_torch(func=func,
+                                            param=theta,
+                                            data=X_bootstrap,
+                                            max_iterations=n_iterations,
+                                            learningrate=lr,
+                                            print_info=print_ga_info)
+
+            #TODO This could do with some checking whether it converged or not. this also should need very little iterations -> really small lr?
+
+        # Saving sample of theta
+        Bootstrap_thetas[j,:] = theta.clone().data.numpy()
 
     # Cache for borders of CIs first row lower bound, second row upper bound, each column corresponds to one entry of the parameter vector
     CI_borders = np.zeros((2,theta_hat.shape[1]))
