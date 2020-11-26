@@ -42,7 +42,7 @@ def normal_CI(alpha, Scores, Hessian, theta_n_M):
 
     # Calculate Covariance matrix
     # Operations on Hessians
-    H_n_inv = np.linalg.inv(Hessian)
+    H_n_inv = np.linalg.inv(Hessian.reshape(theta_n_M.shape[1],theta_n_M.shape[1]))
 
     # Operations on Scores
     S_n = 1/n * np.dot(Scores.T, Scores) # 1/n sum S(theta|X_i) * S(theta|X_i)^T // is a dim(theta) by dim(theta) matrix
@@ -94,7 +94,7 @@ def boostrap_CI(X, alpha, theta_hat, num_bootstraps, lr, n_iterations = 100 ):
     n = X.shape[1]
 
     #Cache for saving Boostrap samples
-    Bootstrap_thetas = mp.zeros((num_bootstraps, theta_hat.shape[1]))
+    Bootstrap_thetas = np.zeros((num_bootstraps, theta_hat.shape[1]))
 
     # Looping over amount of repitions of method
     for j in range(num_bootstraps):
