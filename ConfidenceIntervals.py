@@ -50,6 +50,7 @@ def normal_CI(alpha, Scores, Hessian, theta_n_M):
     # Cov
     Cov = np.dot(H_n_inv, np.dot(S_n, H_n_inv))
     Cov_diag = np.diag(Cov).reshape(1,-1)
+    Cov_diag = np.sqrt(1/n*Cov_diag) # I think thats missing the formlua
 
     # Calculating bounds
 

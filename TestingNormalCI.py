@@ -45,11 +45,11 @@ theta_gt = np.array([[0,1]])
 
 type = 'normal'
 n_CIs = 100
-alpha = 0.05
+alpha = 0.1
 theta_gt = np.array([[0,1]])
-n_list = [10**i for i in range(1,7)]
+n_list = [10**i for i in range(3,5)]
 
-n_ga_iterations =2500
+n_ga_iterations =4000
 n_ga_runs = 1
 lr = 0.005
 '''
