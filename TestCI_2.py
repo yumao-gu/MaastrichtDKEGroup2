@@ -117,7 +117,10 @@ if __name__ == '__main__':
     results = [pool.apply_async(CISamplingTest, args=(ground_truth,n_power,m,test_num))
                for ground_truth,n_power,m,test_num in params]
     results = [p.get() for p in results]
+    file = open('./result.txt', mode='w')
+    file.write(results)
+    file.close()
     print(f'results {results}')
     end_t = datetime.datetime.now()
     elapsed_sec = (end_t - start_t).total_seconds()
-    print("total cosuming time: " + "{:.2f}".format(elapsed_sec) + " 秒")
+    print("total cosuming time: " + "{:.2f}".format(elapsed_sec) + " s")

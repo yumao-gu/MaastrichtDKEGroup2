@@ -39,7 +39,7 @@ if __name__ == '__main__':
     print("the local computer has: " + str(num_cores) + " cpus")
     pool = mp.Pool(num_cores)
     params = []
-    for i in range(21):
+    for i in range(21):1
         params.append([0.5,i,1,10000])
     results = [pool.apply_async(CISamplingTest, args=(ground_truth,n_power,m,test_num))
                for ground_truth,n_power,m,test_num in params]
