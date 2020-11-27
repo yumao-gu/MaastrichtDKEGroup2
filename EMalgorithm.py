@@ -4,13 +4,9 @@ from scipy import stats
 from sklearn.mixture import GaussianMixture
 from sklearn import datasets
 from scipy.stats import multivariate_normal
-# use seaborn plotting defaults
-# If this causes an error, you can comment it out.
-#import seaborn as sns
-#sns.set()
 
 
-def EMsklearn(x,numofmodels):
+def EMsklearn(X,numofmodels,it):
   '''
   fit gaussian models using EM
 
@@ -24,22 +20,19 @@ def EMsklearn(x,numofmodels):
       -density
   '''
 
-  xn=np.zeros((len(x),1))
-  for i in range(len(x)):
-    xn[i]=x[i]
 
-  clf= GaussianMixture(n_components=numofmodels, max_iter=500, random_state = 20).fit(xn)
-  xpdf = np.linspace(-10,20,1000).reshape((-1,1))
-  density = np.exp(clf.score_samples(xpdf))
+  clf= GaussianMixture(n_components=numofmodels, max_iter=it, random_state = 1).fit(X)
+  #xpdf = np.linspace(-10,20,1000)
+  #density = np.exp(clf.score_samples(xpdf))
   mean=clf.means_
   coveriance=clf.covariances_
-  return density,mean,coveriance
+  return mean,coveriance
 
 def bicaic(xn):
   n_estimators = np.arange(1, 10)
-  clfs = [GaussianMixture(n, max_iter=1000).fit(xn) for n in n_estimators]
-  bics = [clf.bic(xn) for clf in clfs]
-  aics = [clf.aic(xn) for clf in clfs]
+  clfs = [GaussianMixture(n, max_iter=1000).fit(X) for n in n_estimators]
+  bics = [clf.bic(X) for clf in clfs]
+  aics = [clf.aic(X) for clf in clfs]
 
   plt.plot(n_estimators, bics, label='BIC')
   plt.plot(n_estimators, aics, label='AIC')
@@ -53,22 +46,17 @@ def plotfitGauss(x,density):
 
 def EMfromscratch(X,k,it):
   mu,cov,z=initial(X,k)
+  print(X.shape)
   x=np.transpose(X)
-  
+  if(k==2):
+    plot_fun(X,mu,cov)
+
   for i in range(it):
     w=Estep(x,mu,cov,z)
-    print('succsees estep')
-    print('weights',w)
-    print()
     mu,cov,z=Mstep(x,w)
-    print('mu',mu)
-    print()
-    print('cov',cov)
-    print()
-    print('z',z)
-    print('succsses mstep')
-    
-    print()
+    #if(k==2):
+    #  plot_fun(X,mu,cov)
+  return mu,cov
 
 def initial(x,k):
   #mean initialization
@@ -151,9 +139,23 @@ def Mstep(x,w):
 
   return mu,cov,z
   
- 
+def plot_fun(X,mu,cov):
 
+  x1 = np.linspace(-4,5,200)  
+  x2 = np.linspace(-4,5,200)
+  W, Y = np.meshgrid(x1,x2) 
+  pos = np.empty(W.shape + (2,))
+  pos[:, :, 0] = W; pos[:, :, 1] = Y
 
+  Z1 = multivariate_normal(mu[0], cov[0])  
+  Z2 = multivariate_normal(mu[1], cov[1])
+
+  fig = plt.figure()
+  ax = fig.add_subplot(111)
+  ax.scatter(X[0,:],X[1,:])
+  plt.contour(W, Y, Z1.pdf(pos), colors="r" ) 
+  plt.contour(W, Y, Z2.pdf(pos), colors="b" )
+  plt.show()
 
 
 

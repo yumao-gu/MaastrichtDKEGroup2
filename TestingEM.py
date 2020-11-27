@@ -2,26 +2,25 @@ from Auxillaries import *
 from EMalgorithm import *
 import numpy as np
 
-weights = [.5, .5]
-means = [[0.,0],[ 3.,5]]
-covs = [[.2**2,], [.2**2]]
-n = 4
-
-# Create sampels of given model
-X = gaussian_mixture_model_sample(50)
 '''
 to do:
 check grafically
-check n=4 for singular matrix
+check 
 '''
-print(f'Shape of X:{X.shape}')
-'''
+means = [[0.9, -0.8],[-0.7, 0.9]]
+covs = [[[2.0, 0.3], [0.3, 0.5]],[[0.3, 0.5], [0.3, 2.0]]]
+weights = [0.3,0.7]
+
+X = gaussian_mixture_model_sample(500,means,covs,weights)
 x=np.transpose(X)
-#print(x)
-mu,cov,z=initial(X,3)
-#print(cov)
-print(cov.shape)
-w=Estep(x,mu,cov,z)
-Mstep(x,w)
-'''
-EMfromscratch(X,2,10)
+print(f'Shape of X:{X.shape}')
+m,c=EMsklearn(x,2,100)
+print('estimated means and covariance using sklearn')
+print(m)
+print()
+print(c)
+ms,cs=EMfromscratch(X,2,100)
+print('estimated means and covariance using emfromscratch')
+print(ms)
+print()
+print(cs)
