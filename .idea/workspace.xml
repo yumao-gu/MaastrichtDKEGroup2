@@ -3,10 +3,7 @@
   <component name="ChangeListManager">
     <list default="true" id="62bb47ea-1590-4e90-a4dd-6b9e5d51061d" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ConfidenceIntervals.py" beforeDir="false" afterPath="$PROJECT_DIR$/ConfidenceIntervals.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/TestingNormalCI.py" beforeDir="false" afterPath="$PROJECT_DIR$/TestingNormalCI.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/normalCI_accuracy_nCI100_a0.05.npy" beforeDir="false" afterPath="$PROJECT_DIR$/normalCI_accuracy_nCI100_a0.05.npy" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/normalCI_accuracy_nCI100_a0.05.png" beforeDir="false" afterPath="$PROJECT_DIR$/normalCI_accuracy_nCI100_a0.05.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestCI_2.py" beforeDir="false" afterPath="$PROJECT_DIR$/TestCI_2.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -57,9 +54,9 @@
       <screen x="67" y="27" width="1299" height="741" />
     </state>
     <state x="313" y="189" width="796" height="414" key="#com.intellij.fileTypes.FileTypeChooser/67.27.1299.741@67.27.1299.741" timestamp="1606380490643" />
-    <state x="319" y="232" key="com.intellij.ide.util.TipDialog" timestamp="1606422507279">
+    <state x="319" y="232" key="com.intellij.ide.util.TipDialog" timestamp="1606485232625">
       <screen x="0" y="0" width="1280" height="800" />
     </state>
-    <state x="319" y="232" key="com.intellij.ide.util.TipDialog/0.0.1280.800@0.0.1280.800" timestamp="1606422507279" />
+    <state x="319" y="232" key="com.intellij.ide.util.TipDialog/0.0.1280.800@0.0.1280.800" timestamp="1606485232625" />
   </component>
 </project>
