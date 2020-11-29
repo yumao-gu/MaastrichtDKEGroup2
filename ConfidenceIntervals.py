@@ -50,7 +50,7 @@ def normal_CI(alpha, Scores, Hessian, theta_n_M):
     # Cov
     Cov = np.dot(H_n_inv, np.dot(S_n, H_n_inv))
     Cov_diag = np.diag(Cov).reshape(1,-1)
-    Cov_diag = np.sqrt(1/n*Cov_diag) # I think thats missing the formlua
+    Cov_diag = np.sqrt(1/n*Cov_diag) # I think thats missing in the formlua
 
     # Calculating bounds
 
@@ -59,9 +59,11 @@ def normal_CI(alpha, Scores, Hessian, theta_n_M):
     CI_borders[0, :] = theta_n_M - z * Cov_diag ## CI_borders[0, i] = theta_n_M[i] - z*Cov_ii
     CI_borders[1, :] = theta_n_M + z * Cov_diag
 
-    #print(f'Covariance matrix:\n {Cov}')
+    # Getting further quantities
+    length = CI_borders[1, :] - CI_borders[0, :]
+    shape = (CI_borders[1, :] - theta_n_M) / (theta_n_M - CI_borders[0, :])
 
-    return CI_borders
+    return CI_borders, length, shape
 
 
 
@@ -92,7 +94,7 @@ def boostrap_CI(X, alpha, theta_hat, num_bootstraps, lr, n_iterations = 100 ):
     '''
 
     # number of data points
-    n = X.shape[1]
+    dimX, n = X.shape
 
     #Cache for saving Boostrap samples
     Bootstrap_thetas = np.zeros((num_bootstraps, theta_hat.shape[1]))
@@ -101,7 +103,7 @@ def boostrap_CI(X, alpha, theta_hat, num_bootstraps, lr, n_iterations = 100 ):
     for j in range(num_bootstraps):
 
         #Creating bootrap sample from original data
-        X_bootstrap = resample(X, replace=True, n_samples= n)
+        X_bootstrap = resample(X.squeeze(), replace=True, n_samples= n).reshape(X.shape)
 
         # perform GA on new likelihhod function
         theta = theta_hat # initialize theta as theta_hat
@@ -120,6 +122,8 @@ def boostrap_CI(X, alpha, theta_hat, num_bootstraps, lr, n_iterations = 100 ):
 
     CI_borders[0,:] = np.quantile(Bootstrap_thetas, alpha/2, axis = 0)
     CI_borders[1,:] = np.quantile(Bootstrap_thetas, 1-alpha/2, axis = 0)
+
+    print(f'CI: {CI}')
 
     return CI_borders
 
@@ -150,7 +154,7 @@ def boostrap_CI_torch(data, alpha, theta_hat, num_bootstraps, func, lr, n_iterat
     '''
 
     # number of data points
-    n = data.shape[1]
+    dim, n = data.shape
 
     #Cache for saving Boostrap samples
     Bootstrap_thetas = np.zeros((num_bootstraps, theta_hat.shape[1]))
@@ -159,7 +163,7 @@ def boostrap_CI_torch(data, alpha, theta_hat, num_bootstraps, func, lr, n_iterat
     for j in range(num_bootstraps):
 
         #Creating bootrap sample from original data
-        X_bootstrap = resample(data, replace=True, n_samples= n)
+        X_bootstrap = data[:, np.random.choice(n, size=n, replace=True)].reshape(data.shape)
 
         # perform GA on new likelihhod function
         theta = torch.tensor(theta_hat, requires_grad = True) # initialize theta as theta_hat
@@ -174,7 +178,7 @@ def boostrap_CI_torch(data, alpha, theta_hat, num_bootstraps, func, lr, n_iterat
             #TODO This could do with some checking whether it converged or not. this also should need very little iterations -> really small lr?
 
         # Saving sample of theta
-        Bootstrap_thetas[j,:] = theta.clone().data.numpy()
+        Bootstrap_thetas[j,:] = theta.clone().data.numpy() # size n x dim(theta)
 
     # Cache for borders of CIs first row lower bound, second row upper bound, each column corresponds to one entry of the parameter vector
     CI_borders = np.zeros((2,theta_hat.shape[1]))
@@ -182,5 +186,9 @@ def boostrap_CI_torch(data, alpha, theta_hat, num_bootstraps, func, lr, n_iterat
     CI_borders[0,:] = np.quantile(Bootstrap_thetas, alpha/2, axis = 0)
     CI_borders[1,:] = np.quantile(Bootstrap_thetas, 1-alpha/2, axis = 0)
 
-    return CI_borders
+    # Getting further quantities
+    length = CI_borders[1,:]-CI_borders[0,:]
+    shape = (CI_borders[1,:]-theta_hat)/(theta_hat-CI_borders[0,:])
+
+    return CI_borders, length, shape
 

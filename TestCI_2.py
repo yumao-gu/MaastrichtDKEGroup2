@@ -42,7 +42,7 @@ get_data = lambda n: torch.from_numpy(gaussian_mixture_model_sample(n, means, co
 
 #CI specifics
 alpha = 0.1
-type_CI = 'normal'
+type_CI = 'normal'#'bootstrap'
 
 def GetCI(n,m, alpha, type_CI):
     '''
@@ -75,16 +75,16 @@ def GetCI(n,m, alpha, type_CI):
                                                 param=theta,
                                                 data=data,
                                                 print_dims=False)
-        ci = normal_CI(alpha, Scores, Hessian, theta_hat)
+        ci, length, shape = normal_CI(alpha, Scores, Hessian, theta_hat)
     elif type_CI == 'bootstrap':
         # Getting Quantities that underly the CIs
         theta = theta.clone().data.numpy()
-        ci = boostrap_CI_torch(data, alpha, theta, num_bootstraps = 100, func = LogLikelihood, lr = 0.01, n_iterations = 100)
+        ci, length, shape = boostrap_CI_torch(data, alpha, theta, num_bootstraps = 1000, func = LogLikelihood, lr = 0.01, n_iterations = 1000)
     else:
         print('Unknown type of CI!')
         sys.exit()
 
-    return ci
+    return ci, length, shape
 
 def CISamplingTest(ground_truth,n_power,m,test_num):
     '''
@@ -98,12 +98,17 @@ def CISamplingTest(ground_truth,n_power,m,test_num):
     :return:
     '''
     result = 0
+    length = 0
+    shape = 0
     n = math.pow(2,n_power)
     for j in range(test_num):
-        ci = GetCI(n,m, alpha=alpha, type_CI=type_CI)
+        print(f'Running Test no {j}')
+        ci, lengthCI , shapeCI = GetCI(n,m, alpha=alpha, type_CI=type_CI)
+        length += lengthCI.squeeze()
+        shape += shapeCI.squeeze()
         if ground_truth >= ci[0] and ground_truth <= ci[1]:
             result += 1
-    return {n_power: result}
+    return {n_power: (result/test_num, length/test_num, shape/test_num)}
 
 
 if __name__ == '__main__':
@@ -112,15 +117,17 @@ if __name__ == '__main__':
     print("the local computer has: " + str(num_cores) + " cpus")
     pool = mp.Pool(num_cores)
     params = []
-    for i in range(3,6):
+    for i in range(6,21):
         params.append([theta_gt[0,0],i,1,1000])
     results = [pool.apply_async(CISamplingTest, args=(ground_truth,n_power,m,test_num))
                for ground_truth,n_power,m,test_num in params]
     results = [p.get() for p in results]
-    file = open('./result.txt', mode='w')
     print(f'results {results}')
-    file.write(results)
+
+    file = open('./result.txt', mode='w')
+    file.write(str(results))
     file.close()
+
     end_t = datetime.datetime.now()
     elapsed_sec = (end_t - start_t).total_seconds()
     print("total cosuming time: " + "{:.2f}".format(elapsed_sec) + " s")
