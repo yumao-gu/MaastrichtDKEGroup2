@@ -309,6 +309,55 @@ def get_derivatives_torch(func, param, data, print_dims = False):
     return Scores, Hessian
 
 
+def load_data(filepath):
+
+    '''
+    This function is designed to load the data that was created using 'TestCI_2.py'. These is a list of dictionaries in a .txt file.
+    Each of the dictionaries in the list has only one key, given by the sample size n the results were calculated on. Further,
+    the value in each dictionary is a three tuple with the first entry being the coverage, the second the avg. length of CIS and
+    the third the avg. shape of the CI.
+
+    Arguments:
+        - filepath: string with the filename/location were the data (as described above is stored)
+
+    Output:
+        - n_list, coverage, length, shape: lists of sample sizes used, list of corresponding coverage frequency
+
+
+    '''
+    import ast
+
+    data = []
+    with open(filepath, "r") as inFile:
+        data = ast.literal_eval(inFile.read())
+
+        n_list = []
+    for dict_ in data:
+        n_list.append(*dict_.keys())
+
+    coverage = [data[i][n][0] for i, n in enumerate(n_list)]
+    length = [data[i][n][1] for i, n in enumerate(n_list)]
+    shape = [data[i][n][2] for i, n in enumerate(n_list)]
+
+    return n_list, coverage, length, shape
+
+
+def plot_data(n_list, coverage, length, shape, alpha):
+    fig, ax = plt.subplots(1, 3, figsize=(15, 4))
+    titles = ['Coverage proportion', 'Length of CIs', 'Shape of CIs']
+
+    ax[0].plot(n_list, coverage)
+    ax[0].hlines(1 - alpha, xmin=min(n_list), xmax=max(n_list), alpha=0.3, color='grey', linestyle='dashed',
+                 label='1-α')
+    ax[1].plot(n_list, length)
+    ax[2].plot(n_list, shape)
+
+    for i in range(3):
+        ax[i].set_xlabel('sample size: n')
+        ax[i].set_title(titles[i])
+
+    ax[0].legend()
+    plt.show()
 
 
 

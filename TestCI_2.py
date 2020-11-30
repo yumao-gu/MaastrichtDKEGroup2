@@ -43,6 +43,7 @@ get_data = lambda n: torch.from_numpy(gaussian_mixture_model_sample(n, means, co
 #CI specifics
 alpha = 0.1
 type_CI = 'normal'#'bootstrap'
+n_Ci = 100
 
 def GetCI(n,m, alpha, type_CI):
     '''
@@ -117,14 +118,15 @@ if __name__ == '__main__':
     print("the local computer has: " + str(num_cores) + " cpus")
     pool = mp.Pool(num_cores)
     params = []
-    for i in range(6,21):
-        params.append([theta_gt[0,0],i,1,1000])
+    for i in range(7,15):
+        params.append([theta_gt[0,0],i,1,n_Ci])
     results = [pool.apply_async(CISamplingTest, args=(ground_truth,n_power,m,test_num))
                for ground_truth,n_power,m,test_num in params]
     results = [p.get() for p in results]
     print(f'results {results}')
 
-    file = open('./result.txt', mode='w')
+    storage_path = './result_'+type_CI+'_'+'a'+str(alpha)+'.txt'
+    file = open(storage_path , mode='w')
     file.write(str(results))
     file.close()
 
