@@ -349,12 +349,14 @@ def plot_data(n_list, coverage, length, shape, alpha):
     ax[0].plot(n_list, coverage)
     ax[0].hlines(1 - alpha, xmin=min(n_list), xmax=max(n_list), alpha=0.3, color='grey', linestyle='dashed',
                  label='1-α')
+    ax[0].set_ylim((0,1))
     ax[1].plot(n_list, length)
     ax[2].plot(n_list, shape)
 
     for i in range(3):
         ax[i].set_xlabel('sample size: n')
         ax[i].set_title(titles[i])
+        ax[i].set_xscale('log')
 
     ax[0].legend()
     plt.show()

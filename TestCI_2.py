@@ -101,7 +101,7 @@ def CISamplingTest(ground_truth,n_power,m,test_num):
     result = 0
     length = 0
     shape = 0
-    n = math.pow(2,n_power)
+    n = math.pow(10,n_power)
     for j in range(test_num):
         print(f'Running Test no {j}')
         ci, lengthCI , shapeCI = GetCI(n,m, alpha=alpha, type_CI=type_CI)
@@ -118,7 +118,7 @@ if __name__ == '__main__':
     print("the local computer has: " + str(num_cores) + " cpus")
     pool = mp.Pool(num_cores)
     params = []
-    for i in range(7,15):
+    for i in range(2,6):
         params.append([theta_gt[0,0],i,1,n_Ci])
     results = [pool.apply_async(CISamplingTest, args=(ground_truth,n_power,m,test_num))
                for ground_truth,n_power,m,test_num in params]

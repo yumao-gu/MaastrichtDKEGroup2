@@ -55,11 +55,12 @@
       <screen x="67" y="27" width="1299" height="741" />
     </state>
     <state x="313" y="189" width="796" height="414" key="#com.intellij.fileTypes.FileTypeChooser/67.27.1299.741@67.27.1299.741" timestamp="1606380490643" />
-    <state x="319" y="232" key="com.intellij.ide.util.TipDialog" timestamp="1606725119322">
-      <screen x="0" y="0" width="1280" height="800" />
+    <state x="319" y="236" key="com.intellij.ide.util.TipDialog" timestamp="1606828433934">
+      <screen x="0" y="22" width="1280" height="737" />
     </state>
     <state x="319" y="232" key="com.intellij.ide.util.TipDialog/0.0.1280.800/1280.-280.1920.1080@0.0.1280.800" timestamp="1606665465478" />
-    <state x="319" y="232" key="com.intellij.ide.util.TipDialog/0.0.1280.800@0.0.1280.800" timestamp="1606725119322" />
+    <state x="319" y="232" key="com.intellij.ide.util.TipDialog/0.0.1280.800@0.0.1280.800" timestamp="1606807256955" />
     <state x="319" y="236" key="com.intellij.ide.util.TipDialog/0.22.1280.737/1280.-258.1920.1058@0.22.1280.737" timestamp="1606662207693" />
+    <state x="319" y="236" key="com.intellij.ide.util.TipDialog/0.22.1280.737@0.22.1280.737" timestamp="1606828433934" />
   </component>
 </project>
