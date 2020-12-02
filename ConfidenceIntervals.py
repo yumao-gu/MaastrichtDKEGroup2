@@ -38,7 +38,7 @@ def normal_CI(alpha, Scores, Hessian, theta_n_M):
     n = Scores.shape[0]
 
     # Calculate quantile
-    z = sp.stats.norm.ppf(1-alpha/2)
+    quantile = sp.stats.norm.ppf(1-alpha/2)
 
     # Calculate Covariance matrix
     # Operations on Hessians
@@ -48,25 +48,22 @@ def normal_CI(alpha, Scores, Hessian, theta_n_M):
     S_n = 1/n * np.dot(Scores.T, Scores) # 1/n sum S(theta|X_i) * S(theta|X_i)^T // is a dim(theta) by dim(theta) matrix
 
     # Cov
-    Cov = np.dot(H_n_inv, np.dot(S_n, H_n_inv))
+    Cov = 1/n*np.dot(H_n_inv, np.dot(S_n, H_n_inv))
     Cov_diag = np.diag(Cov).reshape(1,-1)
-    Cov_diag = np.sqrt(1/n*Cov_diag) # I think thats missing in the formlua
+    Cov_diag = np.sqrt(Cov_diag) # I think thats missing in the formlua
 
     # Calculating bounds
 
     CI_borders = np.zeros((2, theta_n_M.shape[1]))
 
-    CI_borders[0, :] = theta_n_M - z * Cov_diag ## CI_borders[0, i] = theta_n_M[i] - z*Cov_ii
-    CI_borders[1, :] = theta_n_M + z * Cov_diag
+    CI_borders[0, :] = theta_n_M - quantile  * Cov_diag ## CI_borders[0, i] = theta_n_M[i] - z*Cov_ii
+    CI_borders[1, :] = theta_n_M + quantile  * Cov_diag
 
     # Getting further quantities
     length = CI_borders[1, :] - CI_borders[0, :]
     shape = (CI_borders[1, :] - theta_n_M) / (theta_n_M - CI_borders[0, :])
 
     return CI_borders, length, shape
-
-
-
 
 def boostrap_CI(X, alpha, theta_hat, num_bootstraps, lr, n_iterations = 100 ):
 
@@ -127,14 +124,13 @@ def boostrap_CI(X, alpha, theta_hat, num_bootstraps, lr, n_iterations = 100 ):
 
     return CI_borders
 
-
 def boostrap_CI_torch(data, alpha, theta_hat, num_bootstraps, func, lr, n_iterations = 200, print_ga_info = False ):
 
     '''
     Function to create CI via bootstrap method
 
     Arguments:
-        - X: original dataset
+        - data: original dataset
         - alpha: confidence parameter
         - theta_hat: Estimate derived by the normal M-times run gradient ascent
         - num_bootstraps: number of bootstrap samples to be created
@@ -191,4 +187,104 @@ def boostrap_CI_torch(data, alpha, theta_hat, num_bootstraps, func, lr, n_iterat
     shape = (CI_borders[1,:]-theta_hat)/(theta_hat-CI_borders[0,:])
 
     return CI_borders, length, shape
+
+def LogLikeRatio_CI(data, alpha, theta_hat, theta_gt, func):
+
+    '''
+    This function checks whether the LLR_CI covers the ground truth or not.
+    
+    Arguments:
+        - data: the provided data dim(data) x n_samples
+        - alpha: confidence parameter
+        - theta_hat: Estimate derived by the normal M-times run gradient ascent
+        - theta_gt: ground truth
+        - func: LogLikelihood function
+    
+    Outputs:
+        - gt_is_in_CI : boolean whether is covered or not
+    '''
+
+    d = theta_gt.shape[1]
+    n = data.shape[1]
+
+    quantile = sp.stats.chi2.ppf(1-alpha, df = d)
+
+    L_hat = np.mean(func(theta_hat,data), axis = 1).squeeze()
+    L_gt = np.mean(func(theta_gt, data), axis = 1).squeeze()
+
+    gt_is_in_CI = 2*n*(L_hat-L_gt) <= quantile
+
+    return gt_is_in_CI
+
+#TODO def vol_LogLikeRatio_CI():
+
+def Score_CI(data, alpha, theta_gt, func):
+    '''
+    This function checks whether the Scores_CI covers the ground truth or not.
+
+    Arguments:
+        - data: the provided data dim(data) x n_samples
+        - alpha: confidence parameter
+        - theta_gt: ground truth
+        - func: LogLikelihood function
+
+    Outputs:
+        - gt_is_in_CI : boolean whether is covered or not
+    '''
+
+    d = theta_gt.shape[1]
+    n = data.shape[1]
+
+    quantile = sp.stats.chi2.ppf(1 - alpha, df=d)
+
+    # get Scores w.r.t theta_gt
+    theta_gt = torch.from_numpy(theta_gt, requires_grad = True)
+    Scores, _ = get_derivatives_torch(func, theta_gt, data, print_dims=False)
+
+    # Operations on Scores
+    hat_I= 1 / n * np.dot(Scores.T, Scores) # dim d x d
+    nabla_L = np.mean(Scores, axis = 0) # dim 1xd
+
+    gt_is_in_CI =  np.dot(nabla_L, np.dot(hat_I,nabla_L.T)).squeeze() <= quantile/n
+
+    return gt_is_in_CI
+
+def Wald_CI(data, alpha, theta_hat, theta_gt, Scores, Hessian):
+    '''
+    This function checks whether the Scores_CI covers the ground truth or not.
+
+    Arguments:
+        - data: the provided data dim(data) x n_samples
+        - alpha: confidence parameter
+        - theta_gt: ground truth
+        - func: LogLikelihood function
+
+    Outputs:
+        - gt_is_in_CI : boolean whether is covered or not
+    '''
+
+    d = theta_gt.shape[1]
+    n = data.shape[1]
+
+    quantile = sp.stats.chi2.ppf(1 - alpha, df=d)
+
+    # Operations on Hessians
+    H_n_inv = np.linalg.inv(Hessian.reshape(theta_n_M.shape[1], theta_n_M.shape[1]))
+    # Operations on Scores
+    S_n = 1 / n * np.dot(Scores.T, Scores)
+
+    # get Scores w.r.t theta_gt
+    theta_gt = torch.from_numpy(theta_gt, requires_grad = True)
+    Scores, _ = get_derivatives_torch(func, theta_gt, data, print_dims=False)
+    Cov = 1 / n * np.dot(H_n_inv, np.dot(S_n, H_n_inv))
+    Cov_inv = np.linalg.inv(Cov)
+
+    #helper
+    theta_diff = theta_hat-theta_gt # 1 x dim theta
+
+    gt_is_in_CI =  np.dot(theta_diff,np.dot(Cov_inv, theta_diff.T)).squeeze() <= quantile/n
+
+    return gt_is_in_CI
+
+
 

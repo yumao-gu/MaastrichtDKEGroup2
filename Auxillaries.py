@@ -170,7 +170,6 @@ def LL(theta, X, calc_Hessian = False):
 
     return L_value, Score, H
 
-
 def phi_torch(x,mu,sigma):
     '''
     This function calculates the value of density of a N(mu,sigma^2) gaussian random variable at point(s) x, only in a pytorch autograd compatible way
@@ -298,7 +297,6 @@ def get_derivatives_torch(func, param, data, print_dims = False):
 
     return Scores, Hessian
 
-
 def load_data(filepath):
 
     '''
@@ -331,7 +329,6 @@ def load_data(filepath):
 
     return n_list, coverage, length, shape
 
-
 def plot_data(n_list, coverage, length, shape, alpha):
     fig, ax = plt.subplots(1, 3, figsize=(15, 4))
     titles = ['Coverage proportion', 'Length of CIs', 'Shape of CIs']
@@ -350,6 +347,34 @@ def plot_data(n_list, coverage, length, shape, alpha):
 
     ax[0].legend()
     plt.show()
+
+def get_Vol(A,c):
+
+    '''
+    This funtions returns teh volume of a elipse of the for  {y: y^T A y < c} for some symmetric positive definite A
+
+    Arguments:
+        -A: dxd matrix , symmetric, positive definite
+        -c: non-negative scalar
+
+    '''
+
+    d,d1 = A.shape
+    EigVals, _ = np.linalg.eig(A)
+
+    assert  d == d1
+    assert (A == A.T).all()
+    assert (EigVals > 0).all()
+
+    # Helpers
+    det = np.prod(EigVals)**(-1/2)
+    Gamma = sp.special.gamma(d/2+1)
+
+    # Volume formula
+    vol = det*(np.pi*c)**(d/2) / Gamma
+    return vol
+
+
 
 
 
