@@ -30,12 +30,7 @@ def gaussian_model(pos = None, mean = [0.5, -0.2], cov = [[2.0, 0.3], [0.3, 0.5]
         plt.show()
     return model.pdf(pos)
 
-def gaussian_mixture_model(pos = None,
-                                                                means = [[0.9, -0.8],[-0.7, 0.9]],
-                                                                covs = [[[2.0, 0.3], [0.3, 0.5]],
-                                                                                [[1.0, 0.8], [0.5, 0.9]]],
-                                                                weights = [0.3,0.7],
-                                                                test = test):
+def gaussian_mixture_model(pos = None,means = [[0.9, -0.8],[-0.7, 0.9]],covs = [[[2.0, 0.3], [0.3, 0.5]],[[1.0, 0.8], [0.5, 0.9]]],weights = [0.3,0.7],test = test):
 
     '''
     Get z value of a gaussian mixture model
@@ -76,12 +71,7 @@ def gaussian_mixture_model(pos = None,
 
     return value
 
-def gaussian_mixture_model_sample(n_samples = 10000,
-                                                                means = [[0.9, -0.8],[-0.7, 0.9]],
-                                                                covs = [[[2.0, 0.3], [0.3, 0.5]],
-                                                                                [[0.3, 0.5], [0.3, 2.0]]],
-                                                                weights = [0.3,0.7],
-                                                                test = test):
+def gaussian_mixture_model_sample(n_samples = 10000,means = [[0.9, -0.8],[-0.7, 0.9]],covs = [[[2.0, 0.3], [0.3, 0.5]],[[0.3, 0.5], [0.3, 2.0]]],weights = [0.3,0.7],test = test):
     '''
     Sample from a gaussian mixture model
 

@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="62bb47ea-1590-4e90-a4dd-6b9e5d51061d" name="Default Changelist" comment="">
+    <list default="true" id="4acac227-ca34-471c-8ff6-e992e2ea5977" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/MaastrichtDKEGroup2.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/MaastrichtDKEGroup2.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Auxillaries.py" beforeDir="false" afterPath="$PROJECT_DIR$/Auxillaries.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/TestCI_2.py" beforeDir="false" afterPath="$PROJECT_DIR$/TestCI_2.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -14,53 +15,23 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="ProjectId" id="1kowtdwfCeFtztBN1G5VKCtWv6A" />
-  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectId" id="1l4dfWVqj4pn06EROLtpcVJqPI7" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
   <component name="PropertiesComponent">
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
-    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
   </component>
-  <component name="ServiceViewManager">
-    <option name="viewStates">
-      <list>
-        <serviceView>
-          <treeState>
-            <expand />
-            <select />
-          </treeState>
-        </serviceView>
-      </list>
-    </option>
-  </component>
-  <component name="SpellCheckerSettings" BundledDictionaries="0" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" Dictionaries="0" CorrectionsLimit="5" DefaultDictionary="application-level" UseSingleDictionary="true" />
-  <component name="SvnConfiguration">
-    <configuration />
-  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
-      <changelist id="62bb47ea-1590-4e90-a4dd-6b9e5d51061d" name="Default Changelist" comment="" />
-      <created>1606380467978</created>
+      <changelist id="4acac227-ca34-471c-8ff6-e992e2ea5977" name="Default Changelist" comment="" />
+      <created>1606860400345</created>
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
-      <updated>1606380467978</updated>
+      <updated>1606860400345</updated>
     </task>
     <servers />
-  </component>
-  <component name="WindowStateProjectService">
-    <state x="313" y="189" width="796" height="414" key="#com.intellij.fileTypes.FileTypeChooser" timestamp="1606380490643">
-      <screen x="67" y="27" width="1299" height="741" />
-    </state>
-    <state x="313" y="189" width="796" height="414" key="#com.intellij.fileTypes.FileTypeChooser/67.27.1299.741@67.27.1299.741" timestamp="1606380490643" />
-    <state x="319" y="236" key="com.intellij.ide.util.TipDialog" timestamp="1606828433934">
-      <screen x="0" y="22" width="1280" height="737" />
-    </state>
-    <state x="319" y="232" key="com.intellij.ide.util.TipDialog/0.0.1280.800/1280.-280.1920.1080@0.0.1280.800" timestamp="1606665465478" />
-    <state x="319" y="232" key="com.intellij.ide.util.TipDialog/0.0.1280.800@0.0.1280.800" timestamp="1606807256955" />
-    <state x="319" y="236" key="com.intellij.ide.util.TipDialog/0.22.1280.737/1280.-258.1920.1058@0.22.1280.737" timestamp="1606662207693" />
-    <state x="319" y="236" key="com.intellij.ide.util.TipDialog/0.22.1280.737@0.22.1280.737" timestamp="1606828433934" />
   </component>
 </project>
