@@ -351,7 +351,7 @@ def plot_data(n_list, coverage, length, shape, alpha):
 def get_Vol(A,c):
 
     '''
-    This funtions returns teh volume of a elipse of the for  {y: y^T A y < c} for some symmetric positive definite A
+    This funtions returns the volume of an elipse of the for  {y: y^T A y < c} for some symmetric positive definite A
 
     Arguments:
         -A: dxd matrix , symmetric, positive definite

@@ -188,7 +188,7 @@ def boostrap_CI_torch(data, alpha, theta_hat, num_bootstraps, func, lr, n_iterat
 
     return CI_borders, length, shape
 
-def LogLikeRatio_CI(data, alpha, theta_hat, theta_gt, func):
+def LogLikeRatio_CR(data, alpha, theta_hat, theta_gt, func):
 
     '''
     This function checks whether the LLR_CI covers the ground truth or not.
@@ -204,21 +204,25 @@ def LogLikeRatio_CI(data, alpha, theta_hat, theta_gt, func):
         - gt_is_in_CI : boolean whether is covered or not
     '''
 
+    # Dimensions
     d = theta_gt.shape[1]
     n = data.shape[1]
 
+    # Calculating quantile value
     quantile = sp.stats.chi2.ppf(1-alpha, df = d)
 
-    L_hat = np.mean(func(theta_hat,data), axis = 1).squeeze()
-    L_gt = np.mean(func(theta_gt, data), axis = 1).squeeze()
+    # Likelihood value of estimate and of ground truth
+    L_hat = np.mean(func(theta_hat,data).numpy(), axis = 1).squeeze()
+    L_gt = np.mean(func(theta_gt, data).numpy(), axis = 1).squeeze()
 
-    gt_is_in_CI = 2*n*(L_hat-L_gt) <= quantile
+    # Actually querying whether gt is in CI or not
+    gt_is_in_CI = (2*n*(L_hat-L_gt) <= quantile)
 
     return gt_is_in_CI
 
 #TODO def vol_LogLikeRatio_CI():
 
-def Score_CI(data, alpha, theta_gt, func):
+def Score_CR(data, alpha, theta_gt, func):
     '''
     This function checks whether the Scores_CI covers the ground truth or not.
 
@@ -232,32 +236,39 @@ def Score_CI(data, alpha, theta_gt, func):
         - gt_is_in_CI : boolean whether is covered or not
     '''
 
+    # Dimensions
     d = theta_gt.shape[1]
     n = data.shape[1]
 
+    # Calculating quantile value
     quantile = sp.stats.chi2.ppf(1 - alpha, df=d)
 
     # get Scores w.r.t theta_gt
-    theta_gt = torch.from_numpy(theta_gt, requires_grad = True)
+    theta_gt = torch.tensor(theta_gt, dtype = torch.float)
+    theta_gt.requires_grad = True
+
     Scores, _ = get_derivatives_torch(func, theta_gt, data, print_dims=False)
 
     # Operations on Scores
     hat_I= 1 / n * np.dot(Scores.T, Scores) # dim d x d
     nabla_L = np.mean(Scores, axis = 0) # dim 1xd
 
+    # Actually querying whether gt is in CI or not
     gt_is_in_CI =  np.dot(nabla_L, np.dot(hat_I,nabla_L.T)).squeeze() <= quantile/n
 
     return gt_is_in_CI
 
-def Wald_CI(data, alpha, theta_hat, theta_gt, Scores, Hessian):
+def Wald_CR(data, alpha, theta_hat, theta_gt, Scores, Hessian):
     '''
-    This function checks whether the Scores_CI covers the ground truth or not.
+    This function checks whether the Wald_CI covers the ground truth or not.
 
     Arguments:
-        - data: the provided data dim(data) x n_samples
+        - data: the provided data dim(data) x n_samples - only n = n_samples needed actually
         - alpha: confidence parameter
+        - theta_hat: The estimated parameter
         - theta_gt: ground truth
-        - func: LogLikelihood function
+        - Scores: matrix dim n x dim(theta) : Each rows is one S(theta|X_i) (transposed)
+        - Hessian:  dim(theta_n_M) x dim(theta_n_M) = 1/n sum H(theta | X_i)
 
     Outputs:
         - gt_is_in_CI : boolean whether is covered or not
@@ -269,20 +280,19 @@ def Wald_CI(data, alpha, theta_hat, theta_gt, Scores, Hessian):
     quantile = sp.stats.chi2.ppf(1 - alpha, df=d)
 
     # Operations on Hessians
-    H_n_inv = np.linalg.inv(Hessian.reshape(theta_n_M.shape[1], theta_n_M.shape[1]))
+    H_n_inv = np.linalg.inv(Hessian.reshape(d, d))
     # Operations on Scores
     S_n = 1 / n * np.dot(Scores.T, Scores)
 
-    # get Scores w.r.t theta_gt
-    theta_gt = torch.from_numpy(theta_gt, requires_grad = True)
-    Scores, _ = get_derivatives_torch(func, theta_gt, data, print_dims=False)
+    # Calculate Cov matrix and its inverse
     Cov = 1 / n * np.dot(H_n_inv, np.dot(S_n, H_n_inv))
     Cov_inv = np.linalg.inv(Cov)
 
     #helper
     theta_diff = theta_hat-theta_gt # 1 x dim theta
 
-    gt_is_in_CI =  np.dot(theta_diff,np.dot(Cov_inv, theta_diff.T)).squeeze() <= quantile/n
+    # Actually querying whether gt is in CI or not
+    gt_is_in_CI =  np.dot(theta_diff,np.dot(Cov_inv, theta_diff.T)).squeeze() <= quantile
 
     return gt_is_in_CI
 
