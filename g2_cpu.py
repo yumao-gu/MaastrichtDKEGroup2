@@ -28,6 +28,7 @@ def gaussian_mixture_model_sample(n_samples = 10000,
                                   vis = False):
 
   start = time.time()
+  np.random.seed()
   dim = len(means[0])
   samples = np.zeros((dim,n_samples))
 
