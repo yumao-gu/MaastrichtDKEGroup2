@@ -4,6 +4,7 @@ from scipy import stats
 from sklearn.mixture import GaussianMixture
 from sklearn import datasets
 from scipy.stats import multivariate_normal
+from Auxillaries import *
 
 
 def EMsklearn(X,numofmodels,it):
@@ -44,7 +45,10 @@ def plotfitGauss(x,density):
   plt.plot(xpdf, density, '-r')
   plt.xlim(-10, 20);
 
-def EMfromscratch(X,k,it):
+def EMfromscratch(X,k,it,con):
+  em=np.zeros((2,2))
+  ec=np.zeros((2,2,2))
+  err=10000
   mu,cov,z=initial(X,k)
   print(X.shape)
   x=np.transpose(X)
@@ -52,10 +56,20 @@ def EMfromscratch(X,k,it):
     plot_fun(X,mu,cov)
 
   for i in range(it):
+    pm=mu
+    pc=cov
     w=Estep(x,mu,cov,z)
     mu,cov,z=Mstep(x,w)
-    #if(k==2):
-    #  plot_fun(X,mu,cov)
+    em=pm-mu
+    ec=pc-cov
+    errm=abs(sum(sum(em)))
+    errc=abs(sum(sum(sum(ec))))
+    err=errm+errc
+    if err<=con:
+      print('err:',err)
+      print('it:',i)
+      return mu,cov 
+
   return mu,cov
 
 def initial(x,k):

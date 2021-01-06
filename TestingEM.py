@@ -15,11 +15,14 @@ X = gaussian_mixture_model_sample(500,means,covs,weights)
 x=np.transpose(X)
 print(f'Shape of X:{X.shape}')
 m,c=EMsklearn(x,2,100)
+'''
 print('estimated means and covariance using sklearn')
 print(m)
 print()
 print(c)
-ms,cs=EMfromscratch(X,2,100)
+'''
+ms,cs=EMfromscratch(X,2,100000,10**(-10))
+
 print('estimated means and covariance using emfromscratch')
 print(ms)
 print()
