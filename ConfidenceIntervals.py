@@ -5,7 +5,7 @@ from sklearn.utils import resample
 from Auxillaries import *
 
 
-def normal_CI(alpha, Scores, Hessian, theta_n_M):
+def normal_CI(alpha, Scores, Hessian, theta_hat):
     '''
     This function calculates the borders of a normal CI
 
@@ -13,27 +13,29 @@ def normal_CI(alpha, Scores, Hessian, theta_n_M):
         - alpha: confidence parameter
         - Scores: matrix dim n x dim(theta) : Each rows is one S(theta|X_i) (transposed)
 
-        - Hessian:  dim(theta_n_M) x dim(theta_n_M) = 1/n sum H(theta | X_i)
+        - Hessian:  dim(theta_hat) x dim(theta_hat) = 1/n sum H(theta | X_i)
 
 
-        - theta_n_M: The parameter estimate derived by multiple gradient ascent and comparison of likelihood values
+        - theta_hat: The parameter estimate derived by multiple gradient ascent and comparison of likelihood values
                     - Should be of the form: 1x dim(theta)
 
     Outputs:
-        - CI_borders: First row: Lower bounds of CI // 1 x dim(theta_n_M)-vector
-                      Second row:  Upper bounds of CI // 1 x dim(theta_n_M)-vector
+        - CI_borders: First row: Lower bounds of CI // 1 x dim(theta_hat)-vector
+                      Second row:  Upper bounds of CI // 1 x dim(theta_hat)-vector
+        - length: length of CIs
+        - shape: shape parameter of CIs
 
     Further Information:
         - I expect the function tau to map the parameter vector to a single parameter,
-          thus \nabla tau = e_i^T for some i = 1,..., dim(theta_n_M) .
+          thus \nabla tau = e_i^T for some i = 1,..., dim(theta_hat) .
           This results in diagonal entries of covariance matrix being considered
-        - Confidence intervals are thus calculated for each component of the parameter theta_n_M
+        - Confidence intervals are thus calculated for each component of the parameter theta_hat
 
     TODO: Function testing: in particular dimensions
     '''
 
     assert 0 <= alpha and alpha <=1
-    # assert dimensions of theta_n_M, Scores, Hessians
+    # assert dimensions of theta_hat, Scores, Hessians
 
     n = Scores.shape[0]
 
@@ -42,7 +44,7 @@ def normal_CI(alpha, Scores, Hessian, theta_n_M):
 
     # Calculate Covariance matrix
     # Operations on Hessians
-    H_n_inv = np.linalg.inv(Hessian.reshape(theta_n_M.shape[1],theta_n_M.shape[1]))
+    H_n_inv = np.linalg.inv(Hessian.reshape(theta_hat.shape[1],theta_hat.shape[1]))
 
     # Operations on Scores
     S_n = 1/n * np.dot(Scores.T, Scores) # 1/n sum S(theta|X_i) * S(theta|X_i)^T // is a dim(theta) by dim(theta) matrix
@@ -54,14 +56,14 @@ def normal_CI(alpha, Scores, Hessian, theta_n_M):
 
     # Calculating bounds
 
-    CI_borders = np.zeros((2, theta_n_M.shape[1]))
+    CI_borders = np.zeros((2, theta_hat.shape[1]))
 
-    CI_borders[0, :] = theta_n_M - quantile  * Cov_diag ## CI_borders[0, i] = theta_n_M[i] - z*Cov_ii
-    CI_borders[1, :] = theta_n_M + quantile  * Cov_diag
+    CI_borders[0, :] = theta_hat - quantile  * Cov_diag ## CI_borders[0, i] = theta_hat[i] - z*Cov_ii
+    CI_borders[1, :] = theta_hat + quantile  * Cov_diag
 
     # Getting further quantities
     length = CI_borders[1, :] - CI_borders[0, :]
-    shape = (CI_borders[1, :] - theta_n_M) / (theta_n_M - CI_borders[0, :])
+    shape = (CI_borders[1, :] - theta_hat) / (theta_hat - CI_borders[0, :])
 
     return CI_borders, length, shape
 
@@ -134,6 +136,7 @@ def boostrap_CI_torch(data, alpha, theta_hat, num_bootstraps, func, lr, n_iterat
         - alpha: confidence parameter
         - theta_hat: Estimate derived by the normal M-times run gradient ascent
         - num_bootstraps: number of bootstrap samples to be created
+        - func: a pytorch autograd compatible function; function defining the log-probs that build the log-likelihood function
         - lr: learning rate used in gradient ascent
         - n_iterations: number of steps used in gradient ascent
 
@@ -146,6 +149,12 @@ def boostrap_CI_torch(data, alpha, theta_hat, num_bootstraps, func, lr, n_iterat
     Further Information:
         - I expect the function tau to map the parameter vector to a single parameter,
           thus we create a CI for every entry of the parameter vector.
+
+    Outputs:
+        - CI_borders: First row: Lower bounds of CI // 1 x dim(theta_hat)-vector
+                      Second row:  Upper bounds of CI // 1 x dim(theta_hat)-vector
+        - length: length of CIs
+        - shape: shape parameter of CIs
 
     '''
 
@@ -268,7 +277,7 @@ def Wald_CR(data, alpha, theta_hat, theta_gt, Scores, Hessian):
         - theta_hat: The estimated parameter
         - theta_gt: ground truth
         - Scores: matrix dim n x dim(theta) : Each rows is one S(theta|X_i) (transposed)
-        - Hessian:  dim(theta_n_M) x dim(theta_n_M) = 1/n sum H(theta | X_i)
+        - Hessian:  dim(theta_hat) x dim(theta_hat) = 1/n sum H(theta | X_i)
 
     Outputs:
         - gt_is_in_CI : boolean whether is covered or not

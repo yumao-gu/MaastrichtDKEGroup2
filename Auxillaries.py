@@ -134,7 +134,7 @@ def LL(theta, X, calc_Hessian = False):
     # Likelihood value
     g_theta = (1-theta[0,0])*norm.pdf(X,0,0.2) +theta[0,0]*norm.pdf(X,theta[0,1],0.2) # dim 1xn
     Likelihoods = np.log(g_theta) # dim 1xn
-    L_value = np.mean(Likelihoods, axis = 1) # dim 1xn
+    L_value = np.mean(Likelihoods, axis = 1) # dim 1x1
 
     # Simplifications
     E = np.exp(-1*Likelihoods)      # dim 1xn
@@ -142,7 +142,7 @@ def LL(theta, X, calc_Hessian = False):
     phi2 = norm.pdf(X,0, 0.2)  # dim 1xn
 
     # Derivatives first order // Score
-    Score = np.zeros((n, theta.shape[1])) # dim 2xn
+    Score = np.zeros((n, theta.shape[1])) # dim nx2
 
     Score[:,0] = E*(phi1-phi2)   #dim 1xn
     Score[:,1] = E*(phi1*(X-theta[0,1])*(theta[0,0]/0.2**2)) #dim 1xn
@@ -172,7 +172,7 @@ def LL(theta, X, calc_Hessian = False):
 
 def phi_torch(x,mu,sigma):
     '''
-    This function calculates the value of density of a N(mu,sigma^2) gaussian random variable at point(s) x, only in a pytorch autograd compatible way
+    This function calculates the value of the density of a N(mu,sigma^2) gaussian random variable at point(s) x, only in a pytorch autograd compatible way
 
     Arguments:
         - x: a torch tensor. The output inherits the dimensions of x, as the density is applied elementwise
@@ -199,18 +199,18 @@ def phi_torch(x,mu,sigma):
 
     return prob
 
-def gradient_ascent_torch(func, param , data, max_iterations, learningrate, run_id = 0,  print_info = False):
+def gradient_ascent_torch(func, param, data, max_iterations, learningrate, run_id = 0,  print_info = False):
 
     '''
-    This functions performs gradient ascent on the function func, which is governed by the arguments param.
+    This function performs gradient ascent on the function func, which is governed by the arguments param.
 
     Arguments:
         - func: function to be maximized
-        - param: torch tensor with gradient; parameters that serve as arguments of func. t
+        - param: torch tensor with gradient; parameters that serve as arguments of func
         - data: data that governs/parametrizes func. #TODO One might change the design to give the data/X to the function globally
-        - max_iterations: int; (maximum) number of iterations to ber performed during gradient ascent
+        - max_iterations: int; (maximum) number of iterations to be performed during gradient ascent
         - learningrate: scalar; learning rate / step size of the algorithm
-        - run_id; tracker of how mny runs of the procedure have been done
+        - run_id: tracker of how many runs of the procedure have been done
 
     Outputs:
         - param: this (given convergence) is the argument of the maximum of func that was found.
@@ -248,7 +248,7 @@ def gradient_ascent_torch(func, param , data, max_iterations, learningrate, run_
         if print_info:
             if t % 100 == 0:
                 # TODO make more flexible for any ind of parameter length
-                print(f'Run: {run_id+1}\t| Iteration: {t} \t| Log-Likelihood:{loglikelihood_value} \t|  rho: {param[0,0]}, mu: {param[0,1]}  |  Time needed: {datetime.datetime.now()-now}  ')
+                print(f'Run: {run_id+1}\t| Iteration: {t} \t| Log-Likelihood:{loglikelihood_value} \t|  theta: {param}  |  Time needed: {datetime.datetime.now()-now}  ')
                 now = datetime.datetime.now()
 
     # after all iterations are done return parameters, value of log-likelihood function at that maximum, trajectory
