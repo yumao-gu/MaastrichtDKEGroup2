@@ -254,6 +254,68 @@ def gradient_ascent_torch(func, param, data, max_iterations, learningrate, run_i
     # after all iterations are done return parameters, value of log-likelihood function at that maximum, trajectory
     return param, loglikelihood_value, optim_trajectory
 
+def gradient_ascent_torch2(func, param, data, accuracy, learningrate, run_id=0, print_info=False):
+    '''
+    This function performs gradient ascent on the function func, which is governed by the arguments param.
+    Same as gradient_ascent_torch, only based on accuracy stooping criterion rather than maximum of iterations
+
+    Arguments:
+        - func: function to be maximized
+        - param: torch tensor with gradient; parameters that serve as arguments of func
+        - data: data that governs/parametrizes func. #TODO One might change the design to give the data/X to the function globally
+        - accuracy: float; stopping criterion: if two iterates are closer than this, the algorithm stops; should be chosen carefully under consideration of learningrate
+        - learningrate: scalar; learning rate / step size of the algorithm
+        - run_id: tracker of how many runs of the procedure have been done
+
+    Outputs:
+        - param: this (given convergence) is the argument of the maximum of func that was found.
+        - loglikelihood_value: value of the found maximum
+        - optim_trajectory: list of instances of param during optimization
+    '''
+
+    # starting time
+    now = datetime.datetime.now()
+
+    # save initial parameter to trajectory
+    with torch.no_grad():  # necessary?
+        optim_trajectory = [param.clone().data.numpy()]
+
+    # Steps
+    t = 0
+    # Iterations
+    while True:
+
+        # Evaluate loglikelihood of each data point: L(param | X_i) for all i
+        loglikelihoods = func(param, data)  # has dimension 1 x num_data_points
+
+        # Build mean of all log-likelihoods to get actual loglikelihood value
+        loglikelihood_value = torch.mean(loglikelihoods)  # has dim 1x1
+
+        # Calculate gradients of param
+        loglikelihood_value.backward()
+
+        # Update param using gradient, save iterate and empty gradient for next calculation
+        with torch.no_grad():
+            param.add_(learningrate * param.grad)
+            param.grad.zero_()
+            optim_trajectory.append(param.clone().data.numpy())
+
+        # Keeping informed of progress during optimization
+        if print_info:
+            if t % 100 == 0:
+                # TODO make more flexible for any ind of parameter length
+                print(
+                    f'Run: {run_id + 1}\t| Iteration: {t} \t| Log-Likelihood:{loglikelihood_value} \t|  theta: {param}  |  Time needed: {datetime.datetime.now() - now}  ')
+                now = datetime.datetime.now()
+
+        # Break off if accuracy is reached
+        if np.linalg.norm(optim_trajectory[-1] - optim_trajectory[-2]) < accuracy:
+            break
+        # Updating step
+        t += 1
+    # after all iterations are done return parameters, value of log-likelihood function at that maximum, trajectory
+    return param, loglikelihood_value, optim_trajectory
+
 def get_derivatives_torch(func, param, data, print_dims = False):
 
     '''
@@ -296,6 +358,67 @@ def get_derivatives_torch(func, param, data, print_dims = False):
         print(f'Hessian shape {Hessian.shape}')
 
     return Scores, Hessian
+
+
+def theta_n_M(data, n_runs, func, max_iterations=1000, learningrate=0.01, print_info=True):
+    '''
+        This function performs gradient ascent on the function func, which is governed by the arguments param. Here this procedure is done with
+        n_runs = M initializations. The GA limit with the highest Likelihood value is returned, i.e. theta_n_M
+
+        Arguments:
+            - func: a pytorch autograd compatible function; function defining the logprobs that build the log-likelihood function (e.g. \ref{func: LogLikelihood})
+            - data: torch tensor of dim $k\times n $ (c.f. section \ref{sec: Data Generation});  these govern / parametrise func
+            - max_iterations}: scalar (int); (maximum) number of iterations to be performed during gradient ascent
+            - learningrate: scalar; learning rate / step size of the algorithm
+            - print_info: Boolean; whether info about GA runs is to be printed or not
+
+        Outputs:
+            - theta_hat: numpy arry of dim $1\times d$; The estiamtor theta_n_M that is supposed to be the MLE
+            - loglikelihood_value: value of the found maximum
+            - optim_trajectory: list of instances of param during optimization
+        '''
+    # Initializing Loss as minus infinity to make sure first run achieves higher likelihood
+    max_likelihood = -1 * np.inf
+    # trajectory_dict is a cache to save the gradient ascent trajectory of all gradient ascent runs
+    trajectory_dict = {}
+
+    # Running Gradient Ascent multiple (M=n_runs) times
+    for run in range(n_runs):
+
+        # Create/ Initialize variable ' TODO: make initialization more flexible
+        theta = torch.tensor([[uniform.Uniform(0., .6).sample(), uniform.Uniform(0., 5.).sample()]], requires_grad=True)
+
+        # Run complete Gradient ascent
+        theta, L, trajectory = gradient_ascent_torch(func=func,
+                                                     param=theta,
+                                                     data=data,
+                                                     max_iterations=max_iterations,
+                                                     learningrate=learningrate,
+                                                     run_id=run,
+                                                     print_info=print_info)
+
+        # Save optimization trajectory
+        trajectory_dict.update({run: trajectory})
+        # Updating Quantities if new max is found
+
+        # compare likelihood value to previous runs
+        if L > max_likelihood:
+            # This takes forever if n is large. As it is torch implementation I don't see a way to get this faster
+            print(f'New Maximum found! old:{max_likelihood} -> new:{L}')
+
+            # Update highest likelihood and theta estimate
+            max_likelihood = L
+            theta_hat = theta.clone().data.numpy()
+
+    # Calculating Derivatives at found theta_hat
+    # get derivatives
+
+    Scores, Hessian = get_derivatives_torch(func=func,
+                                            param=torch.tensor(theta_hat, requires_grad = True),
+                                            data=data,
+                                            print_dims=False)
+
+    return theta_hat, Scores, Hessian, trajectory_dict
 
 def load_data(filepath):
 
