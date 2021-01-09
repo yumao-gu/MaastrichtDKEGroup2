@@ -43,6 +43,8 @@ def normal_CI(alpha, Scores, Hessian, theta_hat, print_info = False):
 
     # Calculate Covariance matrix
     # Operations on Hessians
+    Hessian = 1e-4 * torch.eye(Hessian.shape[0]) + Hessian
+
     H_n_inv = np.linalg.inv(Hessian.reshape(theta_hat.shape[1],theta_hat.shape[1]))
 
     # Operations on Scores
@@ -62,12 +64,11 @@ def normal_CI(alpha, Scores, Hessian, theta_hat, print_info = False):
 
     # Getting further quantities
     length = CI_borders[1, :] - CI_borders[0, :]
-    shape = (CI_borders[1, :] - theta_hat) / (theta_hat - CI_borders[0, :])
 
     end = time.time()
     if print_info:
         print(f'normal_CI {end-start}')
-    return CI_borders, length, shape
+    return CI_borders, length
 
 def boostrap_CI_torch(data, alpha, theta_hat, num_bootstraps,
                       func, lr, n_iterations = 200, print_info = False ):

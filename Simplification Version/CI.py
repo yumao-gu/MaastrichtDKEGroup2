@@ -46,7 +46,7 @@ alpha = 0.1
 type_CI = 'normal'
 # type_CI = 'bootstrap'
 test_num = 10
-n_power = 5
+n_power = 2
 m = 1
 
 def GetCI(n,m, alpha, type_CI):
@@ -62,17 +62,13 @@ def GetCI(n,m, alpha, type_CI):
     # Generate data
     data = get_data(int(n))
 
-    #parameter to be optimized
-    theta = torch.tensor([[uniform.Uniform(0.,.6).sample(),uniform.Uniform(0.,.5).sample()]], requires_grad=True)
-
     # gradient ascent
-    theta, _, _ = gradient_ascent_torch(func=LogLikelihood,
-                                                 param=theta,
-                                                 data=data,
-                                                 max_iterations=5000,
-                                                 learningrate=0.1,
-                                                 run_id=0,
-                                                 print_info=False)
+    theta, _, _ = theta_n_M(data = data,
+                            n_runs = m,
+                            func = LogLikelihood,
+                            max_iterations=1000,
+                            learningrate=0.01,
+                            print_info=False)
 
     if type_CI == 'normal':
         # Getting Quantities that underly the CIs
@@ -81,7 +77,7 @@ def GetCI(n,m, alpha, type_CI):
                                                 param=theta,
                                                 data=data,
                                                 print_info=False)
-        ci, length, shape = normal_CI(alpha, Scores, Hessian, theta_hat)
+        ci, length = normal_CI(alpha, Scores, Hessian, theta_hat)
     elif type_CI == 'bootstrap':
         # Getting Quantities that underly the CIs
         theta = theta.clone().data.detach().numpy()
@@ -94,9 +90,9 @@ def GetCI(n,m, alpha, type_CI):
         sys.exit()
 
     end = time.time()
-    print(f'GetCI {end-start}')
+    # print(f'GetCI {end-start}')
 
-    return ci, length, shape
+    return ci, length
 
 def CISamplingTest(ground_truth,n_power,m,test_num):
     '''
@@ -114,7 +110,6 @@ def CISamplingTest(ground_truth,n_power,m,test_num):
     result_1 = 0
     result_2 = 0
     length = 0
-    shape = 0
     n = math.pow(10,n_power)
 
     num_cores = int(mp.cpu_count())
@@ -129,9 +124,8 @@ def CISamplingTest(ground_truth,n_power,m,test_num):
     print(f'results {results}')
 
     for r in results:
-        ci, lengthCI , shapeCI = r
+        ci, lengthCI = r
         length += lengthCI.squeeze()
-        shape += shapeCI.squeeze()
         if ground_truth[0][0] >= ci[0][0] and ground_truth[0][0] <= ci[1][0]:
             result_1 += 1
         if ground_truth[0][1] >= ci[0][1] and ground_truth[0][1] <= ci[1][1]:
@@ -140,7 +134,7 @@ def CISamplingTest(ground_truth,n_power,m,test_num):
     end = time.time()
     print(f'CISamplingTest {end-start}')
 
-    return {n_power: (m,result_1/test_num,result_2/test_num, length/test_num, shape/test_num)}
+    return {n_power: (m,result_1/test_num,result_2/test_num, length/test_num)}
 
 if __name__ == '__main__':
     result = CISamplingTest(theta_gt, n_power, m, test_num)
