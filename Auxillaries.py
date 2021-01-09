@@ -359,7 +359,6 @@ def get_derivatives_torch(func, param, data, print_dims = False):
 
     return Scores, Hessian
 
-
 def theta_n_M(data, n_runs, func, max_iterations=1000, learningrate=0.01, print_info=True):
     '''
         This function performs gradient ascent on the function func, which is governed by the arguments param. Here this procedure is done with
@@ -413,12 +412,9 @@ def theta_n_M(data, n_runs, func, max_iterations=1000, learningrate=0.01, print_
     # Calculating Derivatives at found theta_hat
     # get derivatives
 
-    Scores, Hessian = get_derivatives_torch(func=func,
-                                            param=torch.tensor(theta_hat, requires_grad = True),
-                                            data=data,
-                                            print_dims=False)
+    theta_hat = torch.tensor(theta_hat, requires_grad = True)
 
-    return theta_hat, Scores, Hessian, trajectory_dict
+    return theta_hat, trajectory_dict
 
 def load_data(filepath):
 
