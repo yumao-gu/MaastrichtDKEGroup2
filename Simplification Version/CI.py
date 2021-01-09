@@ -111,7 +111,8 @@ def CISamplingTest(ground_truth,n_power,m,test_num):
     '''
 
     start = time.time()
-    result = 0
+    result_1 = 0
+    result_2 = 0
     length = 0
     shape = 0
     n = math.pow(10,n_power)
@@ -131,14 +132,15 @@ def CISamplingTest(ground_truth,n_power,m,test_num):
         ci, lengthCI , shapeCI = r
         length += lengthCI.squeeze()
         shape += shapeCI.squeeze()
-        if ground_truth[0][0] >= ci[0][0] and ground_truth[0][0] <= ci[1][0]\
-                and ground_truth[0][1] >= ci[0][1] and ground_truth[0][1] <= ci[1][1]:
-          result += 1
+        if ground_truth[0][0] >= ci[0][0] and ground_truth[0][0] <= ci[1][0]:
+            result_1 += 1
+        if ground_truth[0][1] >= ci[0][1] and ground_truth[0][1] <= ci[1][1]:
+            result_2 += 1
 
     end = time.time()
     print(f'CISamplingTest {end-start}')
 
-    return {n_power: (result/test_num, length/test_num, shape/test_num)}
+    return {n_power: (m,result_1/test_num,result_2/test_num, length/test_num, shape/test_num)}
 
 if __name__ == '__main__':
     result = CISamplingTest(theta_gt, n_power, m, test_num)
