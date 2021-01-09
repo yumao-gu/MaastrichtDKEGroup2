@@ -4,7 +4,6 @@ import scipy as sp
 from sklearn.utils import resample
 from Auxillaries import *
 
-
 def normal_CI(alpha, Scores, Hessian, theta_hat):
     '''
     This function calculates the borders of a normal CI
