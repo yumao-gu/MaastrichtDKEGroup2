@@ -5,6 +5,7 @@ import scipy as sp
 import random
 import torch
 import datetime
+from torch.distributions import uniform, normal
 from scipy.stats import norm,multivariate_normal
 test = True
 
@@ -199,11 +200,13 @@ def phi_torch(x,mu,sigma):
 
     return prob
 
-def gradient_ascent_torch(func, param, data, max_iterations, learningrate, run_id = 0,  print_info = False):
+def sigmoid(z):
+    return (1+np.exp(-1*z))**(-1)
+
+def gradient_ascent_torch(func, param, data, max_iterations, learningrate, run_id = 0,  print_info = False, a = 100, b = 20):
 
     '''
     This function performs gradient ascent on the function func, which is governed by the arguments param.
-
     Arguments:
         - func: function to be maximized
         - param: torch tensor with gradient; parameters that serve as arguments of func
@@ -211,7 +214,6 @@ def gradient_ascent_torch(func, param, data, max_iterations, learningrate, run_i
         - max_iterations: int; (maximum) number of iterations to be performed during gradient ascent
         - learningrate: scalar; learning rate / step size of the algorithm
         - run_id: tracker of how many runs of the procedure have been done
-
     Outputs:
         - param: this (given convergence) is the argument of the maximum of func that was found.
         - loglikelihood_value: value of the found maximum
@@ -221,6 +223,7 @@ def gradient_ascent_torch(func, param, data, max_iterations, learningrate, run_i
 
     # starting time
     now = datetime.datetime.now()
+
 
     # save initial parameter to trajectory
     with torch.no_grad(): # necessary?
@@ -240,7 +243,7 @@ def gradient_ascent_torch(func, param, data, max_iterations, learningrate, run_i
 
         # Update param using gradient, save iterate and empty gradient for next calculation
         with torch.no_grad():
-            param.add_(learningrate * param.grad)
+            param.add_(sigmoid((t-a)/b)*learningrate*param.grad)
             param.grad.zero_()
             optim_trajectory.append(param.clone().data.numpy())
 
@@ -254,7 +257,7 @@ def gradient_ascent_torch(func, param, data, max_iterations, learningrate, run_i
     # after all iterations are done return parameters, value of log-likelihood function at that maximum, trajectory
     return param, loglikelihood_value, optim_trajectory
 
-def gradient_ascent_torch2(func, param, data, accuracy, learningrate, run_id=0, print_info=False):
+def gradient_ascent_torch2(func, param, data, accuracy, learningrate, run_id=0, print_info=False, a = 100, b = 20):
     '''
     This function performs gradient ascent on the function func, which is governed by the arguments param.
     Same as gradient_ascent_torch, only based on accuracy stooping criterion rather than maximum of iterations
@@ -296,7 +299,7 @@ def gradient_ascent_torch2(func, param, data, accuracy, learningrate, run_id=0, 
 
         # Update param using gradient, save iterate and empty gradient for next calculation
         with torch.no_grad():
-            param.add_(learningrate * param.grad)
+            param.add_(sigmoid((t-a)/b)*learningrate * param.grad)
             param.grad.zero_()
             optim_trajectory.append(param.clone().data.numpy())
 
@@ -309,7 +312,7 @@ def gradient_ascent_torch2(func, param, data, accuracy, learningrate, run_id=0, 
                 now = datetime.datetime.now()
 
         # Break off if accuracy is reached
-        if np.linalg.norm(optim_trajectory[-1] - optim_trajectory[-2]) < accuracy:
+        if np.linalg.norm(optim_trajectory[-1] - optim_trajectory[-2]) < accuracy*learningrate:
             break
         # Updating step
         t += 1
@@ -383,7 +386,7 @@ def theta_n_M(data, n_runs, func, max_iterations=1000, learningrate=0.01, print_
 
     # Running Gradient Ascent multiple (M=n_runs) times
     for run in range(n_runs):
-
+        print(f'-------------------Run: {run}-------------\n\n')
         # Create/ Initialize variable ' TODO: make initialization more flexible
         theta = torch.tensor([[uniform.Uniform(0., .6).sample(), uniform.Uniform(0., 5.).sample()]], requires_grad=True)
 
