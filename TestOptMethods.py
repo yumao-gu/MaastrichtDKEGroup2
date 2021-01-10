@@ -21,8 +21,23 @@ def LogLikelihood(theta, x):
 
     return log_g_theta
 
-#NewtonMethod(LogLikelihood,X,0.001,100,10**(-5),True)
+learningrate=0.001
+max_itterations=10000
+convergence_error=10**(-5)
+print_info=True
 
-#ConjugateGradient_FletcherReeves(LogLikelihood,X,0.5,100,10**(-5),True)
+'''
+There is a possibility the hessian is not invertable if that is the case there is no solution
+You have to re-run method suggestion we drop it or use Quassi-Newton
 
-ConjugateGradient_PolakRibiere(LogLikelihood,X,0.5,100,10**(-5),True)
+'''
+#NewtonMethod(LogLikelihood,X,learningrate,max_itterations,convergence_error,print_info)
+
+'''
+ConjugateGradient_FletcherReeves
+when lr is higher than 0.01 It can either converge really quick(less than 20 iteretions for error 10**(-5)) or take the wrong direction and blow the loglikelihood
+so lr must be always low
+'''
+#ConjugateGradient_FletcherReeves(LogLikelihood,X,learningrate,max_itterations,convergence_error,print_info)
+
+ConjugateGradient_PolakRibiere(LogLikelihood,X,learningrate,max_itterations,convergence_error,print_info)
