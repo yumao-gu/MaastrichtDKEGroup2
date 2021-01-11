@@ -116,7 +116,7 @@ def LogLikelihood(theta, x):
 
     return log_g_theta
 
-def gradient_ascent_torch(func, param, data, max_iterations, learningrate, run_id = 0,  print_info = False, a = 100, b = 20):
+def gradient_ascent_torch(func, param, data, max_iterations, learningrate, run_id = 0,  print_info = False, a = 80, b = 20):
 
     '''
     This function performs gradient ascent on the function func, which is governed by the arguments param.
@@ -169,7 +169,7 @@ def gradient_ascent_torch(func, param, data, max_iterations, learningrate, run_i
     # after all iterations are done return parameters, value of log-likelihood function at that maximum, trajectory
     return param, loglikelihood_value, optim_trajectory
 
-def gradient_ascent_torch2(func, param, data, accuracy, learningrate, run_id=0, print_info=False, a = 100, b = 20):
+def gradient_ascent_torch2(func, param, data, accuracy, learningrate, run_id=0, print_info=False, a = 80, b = 20):
     '''
     This function performs gradient ascent on the function func, which is governed by the arguments param.
     Same as gradient_ascent_torch, only based on accuracy stooping criterion rather than maximum of iterations
