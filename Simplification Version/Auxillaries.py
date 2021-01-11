@@ -327,3 +327,256 @@ def theta_n_M(data, n_runs, func, max_iterations=1000, learningrate=0.01, print_
     theta_hat = torch.tensor(theta_hat, requires_grad = True)
 
     return theta_hat, max_likelihood, trajectory_dict
+
+
+def ConjugateGradient_FletcherReeves(func,data,lr,it,conv,print_info=False):
+  theta = torch.tensor([[uniform.Uniform(0., .4).sample(),uniform.Uniform(0., 4.).sample()]], requires_grad = True)
+  
+  with torch.no_grad(): 
+    optim_trajectory = [theta.clone().data.numpy()]
+
+  err=10000
+
+  loglikelihoods = func(theta, data)
+  loglikelihood_value = torch.mean(loglikelihoods)
+  loglikelihood_value.backward()
+  gradient = theta.grad
+  gradientlist = [gradient.clone().data.numpy()]
+  searchdirectionlist=[gradient.clone().data.numpy()]
+
+
+  with torch.no_grad():
+            theta.add_(lr * gradient)
+            theta.grad.zero_()
+            optim_trajectory.append(theta.clone().data.numpy())
+  
+  if print_info:
+    print(f' Iteration: {0} \t| Log-Likelihood:{loglikelihood_value} \t|  theta: {theta}  \t|Error:{err}')
+    
+  for i in range(it-1):
+    loglikelihoods = func(theta, data)
+
+    loglikelihood_value = torch.mean(loglikelihoods)
+
+    loglikelihood_value.backward()
+    gradient = theta.grad
+    gradientlist.append(gradient.clone().data.numpy())
+
+
+    #transpose for the multiplication
+    grt=torch.transpose(gradient, 0, 1)
+
+    #FletcherReeves scalar
+    previousgradient=torch.tensor(gradientlist[i])
+    previousgrt=torch.transpose(previousgradient, 0, 1)
+
+    enm=torch.mm(gradient,grt)
+    din=torch.mm(previousgradient,previousgrt)
+    Beta=enm/din
+
+    #previous search direction times FR scalar
+
+    psd=torch.tensor(searchdirectionlist[i])
+    addpart=psd*Beta
+
+    #search direction equivalent to the greadiand update in descent
+    sd=torch.add(gradient,addpart)
+    searchdirectionlist.append(sd.clone().data.numpy())
+    #print(sd)
+
+    with torch.no_grad():
+            theta.add_(lr * sd)
+            theta.grad.zero_()
+            optim_trajectory.append(theta.clone().data.numpy())
+
+    if print_info:
+      if i % 1 == 0:
+        now = datetime.datetime.now()
+        print(f' Iteration: {i+1} \t| Log-Likelihood:{loglikelihood_value} \t|  theta: {theta}  \t|Error:{err}  |  Time needed: {datetime.datetime.now()-now}  ')
+    
+    err=np.linalg.norm(optim_trajectory[-1] - optim_trajectory[-2])    
+    if err < conv:
+      break    
+
+  return theta, loglikelihood_value, optim_trajectory
+
+
+
+
+
+def ConjugateGradient_PolakRibiere(func,data,lr,it,conv,print_info=False):
+  theta = torch.tensor([[uniform.Uniform(0., .6).sample(),uniform.Uniform(0., 5.).sample()]], requires_grad = True)
+  
+  with torch.no_grad(): 
+    optim_trajectory = [theta.clone().data.numpy()]
+
+  err=10000
+
+  loglikelihoods = func(theta, data)
+  loglikelihood_value = torch.mean(loglikelihoods)
+  loglikelihood_value.backward()
+  gradient = theta.grad
+  gradientlist = [gradient.clone().data.numpy()]
+  searchdirectionlist=[gradient.clone().data.numpy()]
+
+  with torch.no_grad():
+            theta.add_(lr * gradient)
+            theta.grad.zero_()
+            optim_trajectory.append(theta.clone().data.numpy())
+  
+  if print_info:
+    print(f' Iteration: {0} \t| Log-Likelihood:{loglikelihood_value} \t|  theta: {theta}  \t|Error:{err}')
+  
+  for i in range(it-1):
+    loglikelihoods = func(theta, data)
+
+    loglikelihood_value = torch.mean(loglikelihoods)
+
+    loglikelihood_value.backward()
+    gradient = theta.grad
+    gradientlist.append(gradient.clone().data.numpy())
+
+    #transpose for the multiplication
+    grt=torch.transpose(gradient, 0, 1)
+
+    #Polak-Ribiere scalar
+    previousgradient=torch.tensor(gradientlist[i])
+    previousgrt=torch.transpose(previousgradient, 0, 1)
+
+    negpart=torch.add(gradient,-1*previousgradient)
+    
+    enm=torch.mm(negpart,grt)
+    din=torch.mm(previousgradient,previousgrt)
+    Beta=enm/din
+
+    #previous search direction times pr scalar
+    psd=torch.tensor(searchdirectionlist[i])
+    addpart=psd*Beta
+
+    #search direction equivalent to the greadiand update in descent
+    sd=torch.add(gradient,addpart)
+    searchdirectionlist.append(sd.clone().data.numpy())
+
+    with torch.no_grad():
+            theta.add_(lr * sd)
+            theta.grad.zero_()
+            optim_trajectory.append(theta.clone().data.numpy())
+
+    if print_info:
+      if i % 1 == 0:
+        now = datetime.datetime.now()
+        print(f' Iteration: {i+1} \t| Log-Likelihood:{loglikelihood_value} \t|  theta: {theta}  \t|Error:{err}  |  Time needed: {datetime.datetime.now()-now}  ')
+    
+    err=np.linalg.norm(optim_trajectory[-1] - optim_trajectory[-2])    
+    if err < conv:
+      break    
+
+  return theta, loglikelihood_value, optim_trajectory
+
+
+def theta_n_M_CG_PR(data, n_runs, func, max_iterations=1000, learningrate=0.01, print_info=False):
+    '''
+        This function performs gradient ascent on the function func, which is governed by the arguments param. Here this procedure is done with
+        n_runs = M initializations. The GA limit with the highest Likelihood value is returned, i.e. theta_n_M
+
+        Arguments:
+            - func: a pytorch autograd compatible function; function defining the logprobs that build the log-likelihood function (e.g. \ref{func: LogLikelihood})
+            - data: torch tensor of dim $k\times n $ (c.f. section \ref{sec: Data Generation});  these govern / parametrise func
+            - max_iterations}: scalar (int); (maximum) number of iterations to be performed during gradient ascent
+            - learningrate: scalar; learning rate / step size of the algorithm
+            - print_info: Boolean; whether info about GA runs is to be printed or not
+
+        Outputs:
+            - theta_hat: numpy arry of dim $1\times d$; The estiamtor theta_n_M that is supposed to be the MLE
+            - loglikelihood_value: value of the found maximum
+            - optim_trajectory: list of instances of param during optimization
+        '''
+    # Initializing Loss as minus infinity to make sure first run achieves higher likelihood
+    max_likelihood = -1 * np.inf
+    # trajectory_dict is a cache to save the gradient ascent trajectory of all gradient ascent runs
+    trajectory_dict = {}
+
+    # Running Gradient Ascent multiple (M=n_runs) times
+    for run in range(n_runs):
+
+        # Run complete Gradient ascent
+        theta, L, trajectory = ConjugateGradient_PolakRibiere(func=func,
+                                                     data=data,
+                                                     lr=learningrate,
+                                                     it=max_iterations,
+                                                     conv=10**(-20),                                                     
+                                                     print_info=print_info)
+
+        # Save optimization trajectory
+        trajectory_dict.update({run: trajectory})
+        # Updating Quantities if new max is found
+
+        # compare likelihood value to previous runs
+        if L > max_likelihood:
+            # This takes forever if n is large. As it is torch implementation I don't see a way to get this faster
+            # print(f'New Maximum found! old:{max_likelihood} -> new:{L}')
+
+            # Update highest likelihood and theta estimate
+            max_likelihood = L
+            theta_hat = theta.clone().data.numpy()
+
+    # Calculating Derivatives at found theta_hat
+    # get derivatives
+    # print(f'theta_hat {theta_hat}')
+    theta_hat = torch.tensor(theta_hat, requires_grad = True)
+
+    return theta_hat, max_likelihood, trajectory_dict
+
+
+def theta_n_M_CG_FR(data, n_runs, func, max_iterations=1000, learningrate=0.01, print_info=False):
+    '''
+        This function performs gradient ascent on the function func, which is governed by the arguments param. Here this procedure is done with
+        n_runs = M initializations. The GA limit with the highest Likelihood value is returned, i.e. theta_n_M
+
+        Arguments:
+            - func: a pytorch autograd compatible function; function defining the logprobs that build the log-likelihood function (e.g. \ref{func: LogLikelihood})
+            - data: torch tensor of dim $k\times n $ (c.f. section \ref{sec: Data Generation});  these govern / parametrise func
+            - max_iterations}: scalar (int); (maximum) number of iterations to be performed during gradient ascent
+            - learningrate: scalar; learning rate / step size of the algorithm
+            - print_info: Boolean; whether info about GA runs is to be printed or not
+
+        Outputs:
+            - theta_hat: numpy arry of dim $1\times d$; The estiamtor theta_n_M that is supposed to be the MLE
+            - loglikelihood_value: value of the found maximum
+            - optim_trajectory: list of instances of param during optimization
+        '''
+    # Initializing Loss as minus infinity to make sure first run achieves higher likelihood
+    max_likelihood = -1 * np.inf
+    # trajectory_dict is a cache to save the gradient ascent trajectory of all gradient ascent runs
+    trajectory_dict = {}
+
+    # Running Gradient Ascent multiple (M=n_runs) times
+    for run in range(n_runs):
+
+        # Run complete Gradient ascent
+        theta, L, trajectory = ConjugateGradient_FletcherReeves(func=func,
+                                                     data=data,
+                                                     lr=learningrate,
+                                                     it=max_iterations,
+                                                     conv=10**(-20),                                                     
+                                                     print_info=print_info)
+
+        # Save optimization trajectory
+        trajectory_dict.update({run: trajectory})
+        # Updating Quantities if new max is found
+
+        # compare likelihood value to previous runs
+        if L > max_likelihood:
+            # This takes forever if n is large. As it is torch implementation I don't see a way to get this faster
+            # print(f'New Maximum found! old:{max_likelihood} -> new:{L}')
+
+            # Update highest likelihood and theta estimate
+            max_likelihood = L
+            theta_hat = theta.clone().data.numpy()
+
+    # Calculating Derivatives at found theta_hat
+    # get derivatives
+    # print(f'theta_hat {theta_hat}')
+    theta_hat = torch.tensor(theta_hat, requires_grad = True)
+
+    return theta_hat, max_likelihood, trajectory_dict

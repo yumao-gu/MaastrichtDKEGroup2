@@ -270,4 +270,154 @@ def Wald_CR(data, alpha, theta_hat, theta_gt, Scores, Hessian,print_info = False
     return gt_is_in_CI
 
 
+def boostrap_CI_torch_CG_FR(data, alpha, theta_hat, num_bootstraps,
+                      func, lr, n_iterations = 200, print_info = False ):
 
+    '''
+    Function to create CI via bootstrap method
+
+    Arguments:
+        - data: original dataset
+        - alpha: confidence parameter
+        - theta_hat: Estimate derived by the normal M-times flecher-reeves
+        - num_bootstraps: number of bootstrap samples to be created
+        - func: a pytorch autograd compatible function; function defining the log-probs that build the log-likelihood function
+        - lr: learning rate 
+        - n_iterations: number of steps used 
+
+    Intermediates:
+        - n: size of provided dataset
+        - Bootstrap_thetas: Cache to store the new, to be calculated, estimates of theta, dim: num_bootstraps x dim theta
+        - X_bootstrap: Bootstrap sample of X, size n
+        - CI_borders: lower and upper bounds of CI of each theta_i : dim 2x dim theta
+
+    Further Information:
+        - I expect the function tau to map the parameter vector to a single parameter,
+          thus we create a CI for every entry of the parameter vector.
+
+    Outputs:
+        - CI_borders: First row: Lower bounds of CI // 1 x dim(theta_hat)-vector
+                      Second row:  Upper bounds of CI // 1 x dim(theta_hat)-vector
+        - length: length of CIs
+        - shape: shape parameter of CIs
+
+    '''
+
+    start = time.time()
+
+    # number of data points
+    dim, n = data.shape
+
+    #Cache for saving Boostrap samples
+    Bootstrap_thetas = np.zeros((num_bootstraps, theta_hat.shape[1]))
+
+    # Looping over amount of repitions of method
+    for j in range(num_bootstraps):
+
+        #Creating bootrap sample from original data
+        X_bootstrap = data[:, np.random.choice(n, size=n, replace=True)].reshape(data.shape)
+
+        # perform GA on new likelihhod function
+        theta = torch.tensor(theta_hat, requires_grad = True) # initialize theta as theta_hat
+
+        theta, _, _ = ConjugateGradient_FletcherReeves(func=func,
+                                                     data=X_bootstrap,
+                                                     lr=lr,
+                                                     max_iterations=n_iterations,
+                                                     conv=10**(-20),
+                                                     print_info=print_info)
+
+        # Saving sample of theta
+        Bootstrap_thetas[j,:] = theta.clone().data.numpy() # size n x dim(theta)
+
+    # Cache for borders of CIs first row lower bound, second row upper bound, each column corresponds to one entry of the parameter vector
+    CI_borders = np.zeros((2,theta_hat.shape[1]))
+
+    CI_borders[0,:] = np.quantile(Bootstrap_thetas, alpha/2, axis = 0)
+    CI_borders[1,:] = np.quantile(Bootstrap_thetas, 1-alpha/2, axis = 0)
+
+    # Getting further quantities
+    length = CI_borders[1,:]-CI_borders[0,:]
+    shape = (CI_borders[1,:]-theta_hat)/(theta_hat-CI_borders[0,:])
+
+    end = time.time()
+    if print_info:
+        print(f'boostrap_CI_torch {end - start}')
+
+    return CI_borders, length, shape
+
+def boostrap_CI_torch_CG_PR(data, alpha, theta_hat, num_bootstraps,
+                      func, lr, n_iterations = 200, print_info = False ):
+
+    '''
+    Function to create CI via bootstrap method
+
+    Arguments:
+        - data: original dataset
+        - alpha: confidence parameter
+        - theta_hat: Estimate derived by the normal M-times flecher-reeves
+        - num_bootstraps: number of bootstrap samples to be created
+        - func: a pytorch autograd compatible function; function defining the log-probs that build the log-likelihood function
+        - lr: learning rate 
+        - n_iterations: number of steps used 
+
+    Intermediates:
+        - n: size of provided dataset
+        - Bootstrap_thetas: Cache to store the new, to be calculated, estimates of theta, dim: num_bootstraps x dim theta
+        - X_bootstrap: Bootstrap sample of X, size n
+        - CI_borders: lower and upper bounds of CI of each theta_i : dim 2x dim theta
+
+    Further Information:
+        - I expect the function tau to map the parameter vector to a single parameter,
+          thus we create a CI for every entry of the parameter vector.
+
+    Outputs:
+        - CI_borders: First row: Lower bounds of CI // 1 x dim(theta_hat)-vector
+                      Second row:  Upper bounds of CI // 1 x dim(theta_hat)-vector
+        - length: length of CIs
+        - shape: shape parameter of CIs
+
+    '''
+
+    start = time.time()
+
+    # number of data points
+    dim, n = data.shape
+
+    #Cache for saving Boostrap samples
+    Bootstrap_thetas = np.zeros((num_bootstraps, theta_hat.shape[1]))
+
+    # Looping over amount of repitions of method
+    for j in range(num_bootstraps):
+
+        #Creating bootrap sample from original data
+        X_bootstrap = data[:, np.random.choice(n, size=n, replace=True)].reshape(data.shape)
+
+        # perform GA on new likelihhod function
+        theta = torch.tensor(theta_hat, requires_grad = True) # initialize theta as theta_hat
+
+        theta, _, _ = ConjugateGradient_PolakRibiere(func=func,
+                                                     data=X_bootstrap,
+                                                     lr=lr,
+                                                     max_iterations=n_iterations,
+                                                     conv=10**(-20),
+                                                     print_info=print_info)
+
+        # Saving sample of theta
+        Bootstrap_thetas[j,:] = theta.clone().data.numpy() # size n x dim(theta)
+
+    # Cache for borders of CIs first row lower bound, second row upper bound, each column corresponds to one entry of the parameter vector
+    CI_borders = np.zeros((2,theta_hat.shape[1]))
+
+    CI_borders[0,:] = np.quantile(Bootstrap_thetas, alpha/2, axis = 0)
+    CI_borders[1,:] = np.quantile(Bootstrap_thetas, 1-alpha/2, axis = 0)
+
+    # Getting further quantities
+    length = CI_borders[1,:]-CI_borders[0,:]
+    shape = (CI_borders[1,:]-theta_hat)/(theta_hat-CI_borders[0,:])
+
+    end = time.time()
+    if print_info:
+        print(f'boostrap_CI_torch {end - start}')
+
+    return CI_borders, length, shape
