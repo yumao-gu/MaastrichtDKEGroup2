@@ -43,7 +43,7 @@ get_data = lambda n: torch.from_numpy(gaussian_mixture_model_sample(n, means, co
 #CI specifics
 alpha = 0.1
 type_CR = 'Wald' #'LogLike', 'Score', 'Wald'
-n_CR = 1000
+n_CR = 100
 
 def GetCR(n,m, alpha, type_CR):
     '''
@@ -64,8 +64,8 @@ def GetCR(n,m, alpha, type_CR):
     theta, _, _ = gradient_ascent_torch(func=LogLikelihood,
                                                  param=theta,
                                                  data=data,
-                                                 max_iterations=5000,
-                                                 learningrate=0.1,
+                                                 max_iterations=1000,
+                                                 learningrate=0.01,
                                                  run_id=0,
                                                  print_info=False)
 
@@ -81,7 +81,7 @@ def GetCR(n,m, alpha, type_CR):
 
     elif type_CR == 'Score':
         # Getting Quantities that underly the CIs
-        theta_hat = theta.clone().data.numpy()
+        #theta_hat = theta.clone().data.numpy()
         ci_bool = Score_CR(data, alpha, theta_gt, func = LogLikelihood )
 
     elif type_CR == 'Wald':
@@ -125,7 +125,7 @@ if __name__ == '__main__':
     print("the local computer has: " + str(num_cores) + " cpus")
     pool = mp.Pool(num_cores)
     params = []
-    for i in range(4,5):
+    for i in range(3,4):
         params.append([theta_gt[0,0],i,1,n_CR])
     results = [pool.apply_async(CRSamplingTest, args=(ground_truth,n_power,m,test_num))
                for ground_truth,n_power,m,test_num in params]

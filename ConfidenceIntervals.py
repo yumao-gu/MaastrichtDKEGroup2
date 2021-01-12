@@ -396,11 +396,13 @@ def Score_CR(data, alpha, theta_gt, func):
     Scores, _ = get_derivatives_torch(func, theta_gt, data, print_dims=False)
 
     # Operations on Scores
-    hat_I= 1 / n * np.dot(Scores.T, Scores) # dim d x d
-    nabla_L = np.mean(Scores, axis = 0) # dim 1xd
+    hat_I = 1 / n * np.dot(Scores.T, Scores).reshape(d,d)  # dim d x d
+    print(hat_I, hat_I.shape)
+    hat_I_inv = np.linalg.inv(hat_I)
+    nabla_L = np.mean(Scores, axis=0)  # dim 1xd
 
     # Actually querying whether gt is in CI or not
-    gt_is_in_CI =  np.dot(nabla_L, np.dot(hat_I,nabla_L.T)).squeeze() <= quantile/n
+    gt_is_in_CI = np.dot(nabla_L, np.dot(hat_I_inv, nabla_L.T)).squeeze() <= quantile / n
 
     return gt_is_in_CI
 
