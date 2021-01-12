@@ -12,7 +12,7 @@ from ConfidenceIntervals import *
 weights = [.5,.45,.05]
 means = [[0.],[.75],[3.]]
 covs = [[.2**2],[.2**2],[.2**2]]
-theta_gt = np.array([[0.43309934,1.0573411]])
+theta_gt = np.array([[0.43109772,1.0575168]])
 get_data = lambda n: torch.from_numpy(gaussian_mixture_model_sample(n, means, covs, weights))
 
 # Loglikeihood fucntion to be fitted
@@ -81,10 +81,11 @@ def GetCI(n,m, alpha, type_CI):
     elif type_CI == 'bootstrap':
         # Getting Quantities that underly the CIs
         theta = theta.clone().data.detach().numpy()
-        ci, length, shape = boostrap_CI_torch(data, alpha, theta,
-                                              num_bootstraps = 1000,
-                                              func = LogLikelihood, lr = 0.01,
-                                              n_iterations = 1000,print_info=False)
+        ci, length = boostrap_CI_torch(data, alpha, theta,
+                                       num_bootstraps = 1000,
+                                       func = LogLikelihood,
+                                       lr = 0.01,
+                                       n_iterations = 1000,print_info=False)
     else:
         print('Unknown type of CI!')
         sys.exit()

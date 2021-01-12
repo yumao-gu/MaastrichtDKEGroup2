@@ -11,7 +11,7 @@ from ConfidenceIntervals import *
 weights = [.5,.45,.05]
 means = [[0.],[.75],[3.]]
 covs = [[.2**2],[.2**2],[.2**2]]
-theta_gt = np.array([[0.43309934,1.0573411]])
+theta_gt = np.array([[0.43109772,1.0575168]])
 get_data = lambda n: torch.from_numpy(gaussian_mixture_model_sample(n, means, covs, weights))
 
 alpha = 0.1

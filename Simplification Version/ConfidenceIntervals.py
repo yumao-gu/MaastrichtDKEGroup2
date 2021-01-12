@@ -140,13 +140,12 @@ def boostrap_CI_torch(data, alpha, theta_hat, num_bootstraps,
 
     # Getting further quantities
     length = CI_borders[1,:]-CI_borders[0,:]
-    shape = (CI_borders[1,:]-theta_hat)/(theta_hat-CI_borders[0,:])
 
     end = time.time()
     if print_info:
         print(f'boostrap_CI_torch {end - start}')
 
-    return CI_borders, length, shape
+    return CI_borders, length
 
 def LogLikeRatio_CR(data, alpha, theta_hat, theta_gt, func,print_info = False):
 

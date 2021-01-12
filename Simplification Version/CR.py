@@ -38,14 +38,16 @@ from ConfidenceIntervals import *
 weights = [.5,.45,.05]
 means = [[0.],[.75],[3.]]
 covs = [[.2**2],[.2**2],[.2**2]]
-theta_gt = np.array([[0.43309934,1.0573411]])
+theta_gt = np.array([[0.43109772,1.0575168]])
 get_data = lambda n: torch.from_numpy(gaussian_mixture_model_sample(n, means, covs, weights))
 
 #CI specifics
 alpha = 0.1
-type_CR = 'Wald' #'LogLike', 'Score', 'Wald'
+type_CR = 'LogLike'
+# type_CR = 'Score'
+# type_CR = 'Wald'
 test_num = 1000
-n_power = 5
+n_power = 1
 m = 1
 
 def GetCR(n,m, alpha, type_CR):
@@ -64,13 +66,19 @@ def GetCR(n,m, alpha, type_CR):
     theta = torch.tensor([[uniform.Uniform(0.,.6).sample(),uniform.Uniform(0.,.5).sample()]], requires_grad=True)
 
     # gradient ascent
-    theta, _, _ = gradient_ascent_torch(func=LogLikelihood,
-                                                 param=theta,
-                                                 data=data,
-                                                 max_iterations=5000,
-                                                 learningrate=0.1,
-                                                 run_id=0,
-                                                 print_info=False)
+    # theta, _, _ = gradient_ascent_torch(func=LogLikelihood,
+    #                                              param=theta,
+    #                                              data=data,
+    #                                              max_iterations=5000,
+    #                                              learningrate=0.1,
+    #                                              run_id=0,
+    #                                              print_info=False)
+    theta, _, _ = theta_n_M(data=data,
+                            n_runs=m,
+                            func=LogLikelihood,
+                            max_iterations=1000,
+                            learningrate=0.01,
+                            print_info=False)
 
     if type_CR == 'LogLike':
         # Getting Quantities that underly the CIs

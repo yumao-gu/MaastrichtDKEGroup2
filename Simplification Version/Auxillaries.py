@@ -400,10 +400,6 @@ def ConjugateGradient_FletcherReeves(func,data,lr,it,conv,print_info=False):
 
   return theta, loglikelihood_value, optim_trajectory
 
-
-
-
-
 def ConjugateGradient_PolakRibiere(func,data,lr,it,conv,print_info=False):
   theta = torch.tensor([[uniform.Uniform(0., .6).sample(),uniform.Uniform(0., 5.).sample()]], requires_grad = True)
   
@@ -473,7 +469,6 @@ def ConjugateGradient_PolakRibiere(func,data,lr,it,conv,print_info=False):
 
   return theta, loglikelihood_value, optim_trajectory
 
-
 def theta_n_M_CG_PR(data, n_runs, func, max_iterations=1000, learningrate=0.01, print_info=False):
     '''
         This function performs gradient ascent on the function func, which is governed by the arguments param. Here this procedure is done with
@@ -526,7 +521,6 @@ def theta_n_M_CG_PR(data, n_runs, func, max_iterations=1000, learningrate=0.01, 
     theta_hat = torch.tensor(theta_hat, requires_grad = True)
 
     return theta_hat, max_likelihood, trajectory_dict
-
 
 def theta_n_M_CG_FR(data, n_runs, func, max_iterations=1000, learningrate=0.01, print_info=False):
     '''
