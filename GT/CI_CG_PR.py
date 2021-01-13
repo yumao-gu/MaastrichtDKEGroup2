@@ -15,13 +15,12 @@ theta_gt = np.array([[0.43109772,1.0575168]])
 get_data = lambda n: torch.from_numpy(gaussian_mixture_model_sample(n, means, covs, weights))
 
 alpha = 0.1
-# type_CI = 'normal'
-type_CI = ''
+type_CI = 'normal'
 # type_CI = 'bootstrap'
 test_num = 10
-n_power = 6
-m = 10
-n = math.pow(10,n_power)
+n_power = 2
+m = 1
+n=10
 
 def GetCI(n,m, alpha, type_CI):
     '''
@@ -36,10 +35,10 @@ def GetCI(n,m, alpha, type_CI):
     # Generate data
     data = get_data(int(n))
 
-    theta, _, _ = theta_n_M_CG_FR(data = data,
+    theta, _, _ = theta_n_M_CG_PR(data = data,
                             n_runs = m,
                             func = LogLikelihood,
-                            max_iterations=2000,
+                            max_iterations=1000,
                             learningrate=0.001,
                             print_info=False)
 
@@ -54,7 +53,7 @@ def GetCI(n,m, alpha, type_CI):
     elif type_CI == 'bootstrap':
         # Getting Quantities that underly the CIs
         theta = theta.clone().data.detach().numpy()
-        ci, length, shape = boostrap_CI_torch_CG_FR(data, alpha, theta,
+        ci, length, shape = boostrap_CI_torch_CG_PR(data, alpha, theta,
                                               num_bootstraps = 1000,
                                               func = LogLikelihood, lr = 0.01,
                                               n_iterations = 1000,print_info=False)
@@ -67,37 +66,8 @@ def GetCI(n,m, alpha, type_CI):
 
     return ci, length
 
-
 if __name__ == '__main__':
-    # ci, length=GetCI(n,m, alpha, type_CI)
-    data = get_data(int(n))
-
-    theta, _, _ = theta_n_M_CG_FR(data=data,
-                                  n_runs=m,
-                                  func=LogLikelihood,
-                                  max_iterations=2000,
-                                  learningrate=0.01,
-                                  print_info=False)
-
-    # theta, _, _ = theta_n_M_CG_PR(data=data,
-    #                               n_runs=m,
-    #                               func=LogLikelihood,
-    #                               max_iterations=2000,
-    #                               learningrate=0.01,
-    #                               print_info=False)
-    #
-    # theta, _, _ = theta_n_M(data = data,
-    #                         n_runs = m,
-    #                         func = LogLikelihood,
-    #                         max_iterations=2000,
-    #                         learningrate=0.01,
-    #                         print_info=False)
-    #
-    # theta, _, _ = theta_n_M2(data=data,
-    #                          n_runs=m,
-    #                          func=LogLikelihood,
-    #                          learningrate=0.01,
-    #                          print_info=False)
-    # print("CI using ConjugateGradient_FletcherReeves ")
-    # print(ci)
-    # print(length)
+    ci, length=GetCI(n,m, alpha, type_CI)
+    print("CI using ConjugateGradient_PolakRibiere ")
+    print(ci)
+    print(length)

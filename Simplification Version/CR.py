@@ -36,9 +36,9 @@ from ConfidenceIntervals import *
 # designing data structure to be used
 
 weights = [.5,.45,.05]
-means = [[0.],[.75],[3.]]
+means = [[0.],[.75],[2.75]]
 covs = [[.2**2],[.2**2],[.2**2]]
-theta_gt = np.array([[0.43109772,1.0575168]])
+theta_gt = np.array([[0.44246328, 1.0158333]])
 get_data = lambda n: torch.from_numpy(gaussian_mixture_model_sample(n, means, covs, weights))
 
 #CI specifics
@@ -134,7 +134,7 @@ def CRSamplingTest(ground_truth,n_power,m,test_num):
     results = [pool.apply_async(GetCR, args=(n, m, alpha, type_CR))
                for n, m, alpha, type_CR in params]
     results = [p.get() for p in results]
-    print(f'results {results}')
+    # print(f'results {results}')
 
     for r in results:
         ci_bool = r
@@ -143,7 +143,7 @@ def CRSamplingTest(ground_truth,n_power,m,test_num):
     end = time.time()
     print(f'CRSamplingTest {end - start}')
 
-    return {n_power: (coverage / test_num)}
+    return {n_power: (m , coverage / test_num)}
 
 
 if __name__ == '__main__':

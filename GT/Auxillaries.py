@@ -307,7 +307,7 @@ def theta_n_M(data, n_runs, func, max_iterations=1000, learningrate=0.01, print_
                                                      learningrate=learningrate,
                                                      run_id=run,
                                                      print_info=print_info)
-        # print(f'{theta} {L}')
+        print(f'{theta} {L}')
         # Save optimization trajectory
         trajectory_dict.update({run: trajectory})
         # Updating Quantities if new max is found
@@ -323,7 +323,7 @@ def theta_n_M(data, n_runs, func, max_iterations=1000, learningrate=0.01, print_
 
     # Calculating Derivatives at found theta_hat
     # get derivatives
-    # print(f'theta_n_M theta_hat {theta_hat}')
+    print(f'theta_n_M theta_hat {theta_hat}')
     theta_hat = torch.tensor(theta_hat, requires_grad = True)
 
     return theta_hat, max_likelihood, trajectory_dict
@@ -364,7 +364,7 @@ def theta_n_M2(data, n_runs, func, accuracy=0.00001, learningrate=0.01, print_in
                                                      learningrate=learningrate,
                                                      run_id=run,
                                                      print_info=print_info)
-        # print(f'{theta} {L}')
+        print(f'{theta} {L}')
         # Save optimization trajectory
         trajectory_dict.update({run: trajectory})
         # Updating Quantities if new max is found
@@ -380,7 +380,7 @@ def theta_n_M2(data, n_runs, func, accuracy=0.00001, learningrate=0.01, print_in
 
     # Calculating Derivatives at found theta_hat
     # get derivatives
-    # print(f'theta_n_M theta_hat {theta_hat}')
+    print(f'theta_n_M theta_hat {theta_hat}')
     theta_hat = torch.tensor(theta_hat, requires_grad = True)
 
     return theta_hat, max_likelihood, trajectory_dict
@@ -557,7 +557,7 @@ def theta_n_M_CG_PR(data, n_runs, func, max_iterations=1000, learningrate=0.01, 
                                                      it=max_iterations,
                                                      conv=10**(-20),                                                     
                                                      print_info=print_info)
-        # print(f'{theta} {L}')
+        print(f'{theta} {L}')
         # Save optimization trajectory
         trajectory_dict.update({run: trajectory})
         # Updating Quantities if new max is found
@@ -573,7 +573,7 @@ def theta_n_M_CG_PR(data, n_runs, func, max_iterations=1000, learningrate=0.01, 
 
     # Calculating Derivatives at found theta_hat
     # get derivatives
-    # print(f'theta_n_M_CG_PR theta_hat {theta_hat}')
+    print(f'theta_n_M_CG_PR theta_hat {theta_hat}')
     theta_hat = torch.tensor(theta_hat, requires_grad = True)
 
     return theta_hat, max_likelihood, trajectory_dict
@@ -610,7 +610,7 @@ def theta_n_M_CG_FR(data, n_runs, func, max_iterations=1000, learningrate=0.01, 
                                                      it=max_iterations,
                                                      conv=10**(-20),                                                     
                                                      print_info=print_info)
-        # print(f'{theta} {L}')
+        print(f'{theta} {L}')
 
         # Save optimization trajectory
         trajectory_dict.update({run: trajectory})
@@ -627,7 +627,7 @@ def theta_n_M_CG_FR(data, n_runs, func, max_iterations=1000, learningrate=0.01, 
 
     # Calculating Derivatives at found theta_hat
     # get derivatives
-    # print(f'theta_n_M_CG_FR theta_hat {theta_hat}')
+    print(f'theta_n_M_CG_FR theta_hat {theta_hat}')
     theta_hat = torch.tensor(theta_hat, requires_grad = True)
 
     return theta_hat, max_likelihood, trajectory_dict
