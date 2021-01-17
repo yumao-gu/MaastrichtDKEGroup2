@@ -4,7 +4,6 @@ import datetime
 import multiprocessing as mp
 import sys
 import torch
-from EM_ALG import *
 from torch.distributions import uniform, normal
 from Auxillaries import *
 from ConfidenceIntervals import *
@@ -47,8 +46,8 @@ alpha = 0.1
 type_CI = 'normal'
 # type_CI = 'bootstrap'
 test_num = 200
-n_power = 4
-m = 1
+n_power = 3
+m = 5
 
 def GetCI(n,m, alpha, type_CI):
     '''
@@ -64,9 +63,19 @@ def GetCI(n,m, alpha, type_CI):
     data = get_data(int(n))
 
     # gradient ascent
-    theta, _, _ = theta_n_M_EM(data = data,
+    #theta, _, _ = theta_n_M(data = data,
+    #                        n_runs = m,
+    #                        func = LogLikelihood,
+    #                        max_iterations=1000,
+    #                        learningrate=0.01,
+    #                        print_info=False)
+    theta, _, _ = theta_n_M_CG_PR(data = data,
                             n_runs = m,
-                            max_iterations=2000)
+                            func = LogLikelihood,
+                            max_iterations=2000,
+                            learningrate=0.001,
+                            print_info=False)
+
 
     if type_CI == 'normal':
         # Getting Quantities that underly the CIs

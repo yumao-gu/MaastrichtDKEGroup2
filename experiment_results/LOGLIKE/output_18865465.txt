@@ -1,0 +1,3 @@
+the local computer has: 56 cpus
+CRSamplingTest 300.0754029750824
+result {3: 0.379}

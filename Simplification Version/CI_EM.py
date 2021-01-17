@@ -10,9 +10,9 @@ from ConfidenceIntervals import *
 
 # designing data structure to be used
 weights = [.5,.45,.05]
-means = [[0.],[.75],[3.]]
+means = [[0.],[.75],[2.75]]
 covs = [[.2**2],[.2**2],[.2**2]]
-theta_gt = np.array([[0.43109772,1.0575168]])
+theta_gt = np.array([[0.44246328, 1.0158333]])
 get_data = lambda n: torch.from_numpy(gaussian_mixture_model_sample(n, means, covs, weights))
 
 alpha = 0.1
